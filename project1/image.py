@@ -15,6 +15,7 @@ class Window(QWidget):
         for (dirpath, dirnames, filenames) in walk("./data"):
             self.data_files.extend(filenames)
             break
+        self.data_files.sort()
         print(self.data_files)
 
         self.initUI(int(sys.argv[1]), int(sys.argv[2]), sys.argv[3])
