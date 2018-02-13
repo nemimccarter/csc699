@@ -18,7 +18,7 @@ class Window(QWidget):
         
         self.title = 'CSC 690 - Project 1'
         self.data_files = []
-        self.data_index = 0
+        self.data_index = 1
         
         for (dirpath, dirnames, filenames) in walk('./data'):
             self.data_files.extend(filenames)
@@ -42,34 +42,20 @@ class Window(QWidget):
         self.hbox.addWidget(self.label)
         self.setLayout(self.hbox)
 
-        if (self.pixmap.height() > CONST_HEIGHT or self.pixmap.width() > CONST_WIDTH):
-            if (self.pixmap.width() > self.pixmap.height()):
-                self.pixmap = self.pixmap.scaledToWidth(CONST_WIDTH - (2 * CONST_BORDER))
-            else:
-                self.pixmap = self.pixmap.scaledToHeight(CONST_HEIGHT - (2 * CONST_BORDER))
+        self.show_image()
 
-        self.label.setPixmap(self.pixmap)
-        self.label.resize(CONST_WIDTH, CONST_HEIGHT)
-        self.label.setAlignment(Qt.AlignCenter)
-        self.show()
-    
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_A:
             self.data_index = self.data_index + 1
-            print("A key hit")
-            pixmap = QPixmap('./data/' + str(self.data_index))
-            self.change_image()
+            if self.data_index >= len(self.data_files):
+                self.data_index = 0
 
-    def change_image(self):
-        self.data_index = self.data_index + 1
+            self.show_image()
+
+    def show_image(self):
         self.pixmap = QPixmap('./data/' + self.data_files[self.data_index])
-
-        if (self.pixmap.height() > CONST_HEIGHT or self.pixmap.width() > CONST_WIDTH):
-            if (self.pixmap.width() > self.pixmap.height()):
-                self.pixmap = self.pixmap.scaledToWidth(CONST_WIDTH - (2 * CONST_BORDER))
-            else:
-                self.pixmap = self.pixmap.scaledToHeight(CONST_HEIGHT - (2 * CONST_BORDER))
-
+       
+        self.pixmap = self.pixmap.scaled(800, 600, Qt.KeepAspectRatio)
         self.label.setPixmap(self.pixmap)
         self.label.resize(CONST_WIDTH, CONST_HEIGHT)
         self.label.setAlignment(Qt.AlignCenter)
