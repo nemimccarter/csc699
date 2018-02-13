@@ -18,7 +18,7 @@ class Window(QWidget):
         
         self.title = 'CSC 690 - Project 1'
         self.data_files = []
-        self.data_index = 1
+        self.data_index = 0
         
         for (dirpath, dirnames, filenames) in walk('./data'):
             self.data_files.extend(filenames)
@@ -30,15 +30,15 @@ class Window(QWidget):
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(100, 100, CONST_WIDTH, CONST_HEIGHT)
-
+        stylesheet = '''
+                     border: 20px solid black;
+                     background: blue;
+                     '''
         self.hbox = QHBoxLayout(self)
         self.pixmap = QPixmap('./data/' + self.data_files[self.data_index])
 
         self.label = QLabel(self)
-        self.label.setText('This is a QLabel')
-        self.label.setStyleSheet('border: ' + str(CONST_BORDER) + ' solid black')
-        self.label.resize(CONST_WIDTH, CONST_HEIGHT)
-        self.label.setPixmap(self.pixmap)
+        self.label.setStyleSheet(stylesheet)
         self.hbox.addWidget(self.label)
         self.setLayout(self.hbox)
 
@@ -55,7 +55,7 @@ class Window(QWidget):
     def show_image(self):
         self.pixmap = QPixmap('./data/' + self.data_files[self.data_index])
        
-        self.pixmap = self.pixmap.scaled(800, 600, Qt.KeepAspectRatio)
+        self.pixmap = self.pixmap.scaled(CONST_WIDTH, CONST_HEIGHT, Qt.KeepAspectRatio)
         self.label.setPixmap(self.pixmap)
         self.label.resize(CONST_WIDTH, CONST_HEIGHT)
         self.label.setAlignment(Qt.AlignCenter)
