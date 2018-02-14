@@ -45,11 +45,18 @@ class Window(QWidget):
         self.show_image()
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_A:
+        key_pressed = event.key()
+        if key_pressed == Qt.Key_Right:
             self.data_index = self.data_index + 1
             if self.data_index >= len(self.data_files):
                 self.data_index = 0
+            self.show_image()
 
+        elif key_pressed == Qt.Key_Left:
+            self.data_index = self.data_index - 1
+            if self.data_index < 0:
+               self.data_index = len(self.data_files) - 1
+            
             self.show_image()
 
     def show_image(self):
@@ -57,7 +64,6 @@ class Window(QWidget):
        
         self.pixmap = self.pixmap.scaled(CONST_WIDTH, CONST_HEIGHT, Qt.KeepAspectRatio)
         self.label.setPixmap(self.pixmap)
-        self.label.resize(CONST_WIDTH, CONST_HEIGHT)
         self.label.setAlignment(Qt.AlignCenter)
         self.show()
 
