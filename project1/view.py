@@ -11,19 +11,38 @@ CONST_WIDTH = 800
 CONST_HEIGHT = 600
 CONST_BORDER = 20
 
-class Window(QWidget):
+class Model():
+    def __init__(self, dir_name):
+        self.data_files = []
+        self.data_index = 0
+        self.dir_name = dir_name
+        for (dirpath, dirnames, filenames) in walk(dir_name):
+            self.data_files.extend(filenames)
+            break
+        self.data_files.sort()
 
+    def next_image(self):
+        self.data_index = self.data_index + 1
+        if (self.data_index >= len(self.data_files)):
+            self.data_index = 0
+
+    def prev_image(self):
+        self.data_index = self.data_index - 1
+        if (self.data_index < 0):
+            self.data_index = len(self.data_files) - 1
+
+
+    def get_current_filename(self):
+        return self.dir_name + self.data_files[self.data_index]
+
+class Window(QWidget):
     def __init__(self):
         super().__init__()
         
         self.title = 'CSC 690 - Project 1'
         self.data_files = []
         self.data_index = 0
-        
-        for (dirpath, dirnames, filenames) in walk('./data'):
-            self.data_files.extend(filenames)
-            break
-        self.data_files.sort()
+        self.model = Model('./data/')
 
         self.initUI()
 
@@ -35,7 +54,7 @@ class Window(QWidget):
                      background: blue;
                      '''
         self.hbox = QHBoxLayout(self)
-        self.pixmap = QPixmap('./data/' + self.data_files[self.data_index])
+        self.pixmap = QPixmap(self.model.get_current_filename())
 
         self.label = QLabel(self)
         self.label.setStyleSheet(stylesheet)
@@ -47,20 +66,15 @@ class Window(QWidget):
     def keyPressEvent(self, event):
         key_pressed = event.key()
         if key_pressed == Qt.Key_Right:
-            self.data_index = self.data_index + 1
-            if self.data_index >= len(self.data_files):
-                self.data_index = 0
+            self.model.next_image()
             self.show_image()
 
         elif key_pressed == Qt.Key_Left:
-            self.data_index = self.data_index - 1
-            if self.data_index < 0:
-               self.data_index = len(self.data_files) - 1
-            
+            self.model.prev_image()
             self.show_image()
 
     def show_image(self):
-        self.pixmap = QPixmap('./data/' + self.data_files[self.data_index])
+        self.pixmap = QPixmap(self.model.get_current_filename())
        
         self.pixmap = self.pixmap.scaled(CONST_WIDTH, CONST_HEIGHT, Qt.KeepAspectRatio)
         self.label.setPixmap(self.pixmap)
