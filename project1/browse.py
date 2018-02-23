@@ -44,13 +44,7 @@ class Window(QWidget):
         self.model = Model('./data/')
         self.thumbnail_labels = []
         self.thumbnail_pixmaps = []
-       
-        for x in range(0, 5):
-            self.thumbnail_labels.append(QLabel(self))
-
-        # set initial thumbnail images
-        self.load_thumbnails()
-
+      
         self.initUI()
 
 
@@ -72,15 +66,6 @@ class Window(QWidget):
         # hbox for fullscreen
         self.hbox = QHBoxLayout(self)
         self.hbox.addWidget(self.label)
-
-        # set thumbnail QLabels
-        offset = 30
-
-        for label in self.thumbnail_labels:
-            label.setStyleSheet(stylesheet)
-            # label.resize(100, 100)
-            # label.move(offset, 50)
-            offset += 20
 
         self.setLayout(self.hbox)
 
@@ -106,7 +91,6 @@ class Window(QWidget):
         self.label.setPixmap(self.pixmap)
         self.label.setAlignment(Qt.AlignCenter)
 
-        self.model.next_filename()
         self.show()
 
 
@@ -118,18 +102,6 @@ class Window(QWidget):
     def prev_image(self):
     	self.model.prev_filename()
     	self.show_image()
-
-
-    def load_thumbnails(self):
-        for index in range(0, 5):
-            self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()))
-            self.model.next_filename()
-    
-    def show_thumbnails(self):
-    	for index in range(0, 5):
-    		self.thumbnail_labels[index].setPixmap(self.thumbnail_pixmaps[index]).layout().addWidget(index, index * 10, 50)
-
-    	self.show()
 
     		
 if __name__ == '__main__':
