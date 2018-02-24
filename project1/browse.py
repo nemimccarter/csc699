@@ -53,6 +53,7 @@ class Window(QWidget):
         self.thumbnail_labels = []
         self.thumbnail_pixmaps = []
         self.view_mode = 'thumbnails'
+        self.thumbnail_index = 0
 
         self.load_thumbnails()
         self.initUI()
@@ -91,10 +92,24 @@ class Window(QWidget):
     def keyPressEvent(self, event):
         key_pressed = event.key()
 
-        if key_pressed == Qt.Key_Right: 
+        if key_pressed == Qt.Key_Right:
         	self.next_image()
         elif key_pressed == Qt.Key_Left: 
         	self.prev_image()
+        elif key_pressed == Qt.Key_Up: 
+        	print("up hit")
+        elif key_pressed == Qt.Key_Down: 
+        	print('thumbnails hit')
+        elif key_pressed == 46:
+        	print('>')
+
+        	self.next_thumbnails()
+        	self.show()
+        elif key_pressed == 44:
+        	print('<')
+
+        	self.prev_thumbnails()
+        	self.show()
 
 
     def show_image(self):
@@ -118,11 +133,14 @@ class Window(QWidget):
 
 
     def load_thumbnails(self):
-    	for index in range(0, 5):
-    		# load and scale pixmaps
+    	# load images into pixmap array
+    	for _ in self.model.image_files:
     		self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()))
-    		self.thumbnail_pixmaps[index] = self.thumbnail_pixmaps[index].scaled(100, 100, Qt.KeepAspectRatio)
+    		self.model.next_filename()
 
+    	for index in range(0, 5):
+    		# scale pixmaps
+    		self.thumbnail_pixmaps[index] = self.thumbnail_pixmaps[index].scaled(100, 100, Qt.KeepAspectRatio)
 
     		self.next_image()
 
@@ -136,9 +154,31 @@ class Window(QWidget):
     		# TODO: remove magic numbers below
     		self.thumbnail_labels[index].move(20 + index * 150 + (index * 20), (CONST_HEIGHT - 100) / 2)
 
+    		self.thumbnail_index = 4
+
     	self.show()
 
-    		
+
+    def prev_thumbnails(self):
+    	self.thumbnail_index -= 5
+    	if self.thumbnail_index < 0:
+    		self.thumbnail_index = len(self.thumbnail_pixmaps) - 1
+    	for label in self.thumbnail_labels:
+	        label.setPixmap(self.thumbnail_pixmaps[self.thumbnail_index])
+	        self.thumbnail_index -= 1
+	        if self.thumbnail_index < 0:
+	        	self.thumbnail_index = len(self.thumbnail_pixmaps) - 1
+
+
+    def next_thumbnails(self):
+	    for label in self.thumbnail_labels:
+	    	label.setPixmap(self.thumbnail_pixmaps[self.thumbnail_index])
+	    	self.thumbnail_index += 1
+
+	    	if self.thumbnail_index >= len(self.thumbnail_pixmaps):
+	    		self.thumbnail_index = 0
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = Window()
