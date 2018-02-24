@@ -13,38 +13,48 @@ CONST_BORDER = 20
 
 class Model():
     def __init__(self, dir_name):
-        self.data_files = []
-        self.data_index = 0
+        self.image_files = []
+        self.fullscreen_index = 0
         self.dir_name = dir_name
+        
         for (dirpath, dirnames, filenames) in walk(dir_name):
-            self.data_files.extend(filenames)
+            self.image_files.extend(filenames)
             break
-        self.data_files.sort()
+        
+        self.image_files.sort()
+
 
     def next_filename(self):
-        self.data_index = self.data_index + 1
-        if (self.data_index >= len(self.data_files)):
-            self.data_index = 0
+        self.fullscreen_index = self.fullscreen_index + 1
+
+        if (self.fullscreen_index >= len(self.image_files)):
+            self.fullscreen_index = 0
+
 
     def prev_filename(self):
-        self.data_index = self.data_index - 1
-        if (self.data_index < 0):
-            self.data_index = len(self.data_files) - 1
+        self.fullscreen_index = self.fullscreen_index - 1
+
+        if (self.fullscreen_index < 0):
+            self.fullscreen_index = len(self.image_files) - 1
+
 
     def get_current_filename(self):
-        return self.dir_name + self.data_files[self.data_index]
+        return self.dir_name + self.image_files[self.fullscreen_index]
+
 
 class Window(QWidget):
     def __init__(self):
         super().__init__()
         
         self.title = 'CSC 690 - Project 1'
-        self.data_files = []
-        self.data_index = 0
+        self.image_files = []
+        self.fullscreen_index = 0
         self.model = Model('./data/')
         self.thumbnail_labels = []
         self.thumbnail_pixmaps = []
-      
+        self.view_mode = 'thumbnails'
+
+        self.load_thumbnails()
         self.initUI()
 
 
@@ -57,7 +67,9 @@ class Window(QWidget):
                      background: black;
                      '''
 
+        # load pixmaps
         self.pixmap = QPixmap(self.model.get_current_filename())
+        self.load_thumbnails()
 
         self.label = QLabel(self)
         self.label.setStyleSheet(stylesheet)
@@ -65,14 +77,15 @@ class Window(QWidget):
 
         # hbox for fullscreen
         self.hbox = QHBoxLayout(self)
-        self.hbox.addWidget(self.label)
 
         self.setLayout(self.hbox)
 
-        self.show_image()
+        #self.show_image()
         #self.label.hide()
 
-        #self.show_thumbnails()
+        self.load_thumbnails()
+
+        self.show()
 
 
     def keyPressEvent(self, event):
@@ -96,12 +109,34 @@ class Window(QWidget):
 
     def next_image(self):
         self.model.next_filename()
-        self.show_image()
+        #self.show_image()
 
 
     def prev_image(self):
     	self.model.prev_filename()
-    	self.show_image()
+    	#self.show_image()
+
+
+    def load_thumbnails(self):
+    	for index in range(0, 5):
+    		# load and scale pixmaps
+    		self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()))
+    		self.thumbnail_pixmaps[index] = self.thumbnail_pixmaps[index].scaled(100, 100, Qt.KeepAspectRatio)
+
+
+    		self.next_image()
+
+    		# init thumbnail labels with corresponding pixmap
+    		self.thumbnail_labels.append(QLabel(self))
+    		self.thumbnail_labels[index].setPixmap(self.thumbnail_pixmaps[index])
+
+    		# positioning labels
+    		self.thumbnail_labels[index].resize(100,100)
+    		self.thumbnail_labels[index].setAlignment(Qt.AlignCenter)
+    		# TODO: remove magic numbers below
+    		self.thumbnail_labels[index].move(20 + index * 150 + (index * 20), (CONST_HEIGHT - 100) / 2)
+
+    	self.show()
 
     		
 if __name__ == '__main__':
