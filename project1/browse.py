@@ -54,8 +54,12 @@ class Window(QWidget):
         self.thumbnail_pixmaps = []
         self.view_mode = 'thumbnails'
         self.thumbnail_index = 0
+        self.selected_thumbnail = 0
+        self.stylesheet = '''
+                          border: 20px solid black;
+                          background: black;
+                          '''
 
-        self.load_thumbnails()
         self.initUI()
 
 
@@ -63,28 +67,23 @@ class Window(QWidget):
         self.setWindowTitle(self.title)
         self.setGeometry(100, 100, CONST_WIDTH, CONST_HEIGHT)
 
-        stylesheet = '''
-                     border: 20px solid black;
-                     background: black;
-                     '''
-
         # load pixmaps
         self.pixmap = QPixmap(self.model.get_current_filename())
         self.load_thumbnails()
 
         self.label = QLabel(self)
-        self.label.setStyleSheet(stylesheet)
-        #self.label.setFrameShape(QFrame.StyledPanel)
+        self.label.setStyleSheet(self.stylesheet)
+        self.label.setFrameShape(QFrame.StyledPanel)
+
+        self.thumbnail_labels[0].setStyleSheet('border: 5px solid red;')
 
         # hbox for fullscreen
         self.hbox = QHBoxLayout(self)
 
-        self.setLayout(self.hbox)
+        #self.setLayout(self.hbox)
 
         #self.show_image()
-        #self.label.hide()
-
-        self.load_thumbnails()
+        self.label.hide()
 
         self.show()
 
@@ -93,23 +92,32 @@ class Window(QWidget):
         key_pressed = event.key()
 
         if key_pressed == Qt.Key_Right:
+        	self.select_next_thumbnail()
         	self.next_image()
-        elif key_pressed == Qt.Key_Left: 
+        
+        elif key_pressed == Qt.Key_Left:
+        	self.select_prev_thumbnail() 
         	self.prev_image()
+        
         elif key_pressed == Qt.Key_Up: 
-        	print("up hit")
-        elif key_pressed == Qt.Key_Down: 
-        	print('thumbnails hit')
+        	self.label.setPixmap(QPixmap(self.model.get_current_filename()))
+        	self.show_image()
+        	self.label.show()
+        	
+        	for label in self.thumbnail_labels:
+        		label.hide()
+        
+        elif key_pressed == Qt.Key_Down:
+        	self.label.hide()
+
+        	for label in self.thumbnail_labels:
+        		label.show()
+        
         elif key_pressed == 46:
-        	print('>')
-
-        	self.next_thumbnails()
-        	self.show()
+        	self.cycle_thumbnails_next()
+        
         elif key_pressed == 44:
-        	print('<')
-
-        	self.prev_thumbnails()
-        	self.show()
+        	self.cycle_thumbnails_prev()
 
 
     def show_image(self):
@@ -119,7 +127,28 @@ class Window(QWidget):
         self.label.setPixmap(self.pixmap)
         self.label.setAlignment(Qt.AlignCenter)
 
-        self.show()
+        #self.show()
+
+    def select_next_thumbnail(self):
+    	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('')
+    	self.selected_thumbnail += 1
+
+    	if self.selected_thumbnail >= 5:
+    		self.selected_thumbnail = 0
+    		self.cycle_thumbnails_next()
+
+    	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('border: 5px solid red;')
+
+
+    def select_prev_thumbnail(self):
+    	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('')
+    	self.selected_thumbnail -= 1
+
+    	if self.selected_thumbnail < 0:
+    		self.selected_thumbnail = 4
+    		self.cycle_thumbnails_prev()
+
+    	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('border: 5px solid red;')
 
 
     def next_image(self):
@@ -135,15 +164,10 @@ class Window(QWidget):
     def load_thumbnails(self):
     	# load images into pixmap array
     	for _ in self.model.image_files:
-    		self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()))
+    		self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(100, 100, Qt.KeepAspectRatio))
     		self.model.next_filename()
 
     	for index in range(0, 5):
-    		# scale pixmaps
-    		self.thumbnail_pixmaps[index] = self.thumbnail_pixmaps[index].scaled(100, 100, Qt.KeepAspectRatio)
-
-    		self.next_image()
-
     		# init thumbnail labels with corresponding pixmap
     		self.thumbnail_labels.append(QLabel(self))
     		self.thumbnail_labels[index].setPixmap(self.thumbnail_pixmaps[index])
@@ -154,29 +178,30 @@ class Window(QWidget):
     		# TODO: remove magic numbers below
     		self.thumbnail_labels[index].move(20 + index * 150 + (index * 20), (CONST_HEIGHT - 100) / 2)
 
-    		self.thumbnail_index = 4
 
-    	self.show()
-
-
-    def prev_thumbnails(self):
+    def cycle_thumbnails_prev(self):
     	self.thumbnail_index -= 5
-    	if self.thumbnail_index < 0:
-    		self.thumbnail_index = len(self.thumbnail_pixmaps) - 1
-    	for label in self.thumbnail_labels:
-	        label.setPixmap(self.thumbnail_pixmaps[self.thumbnail_index])
-	        self.thumbnail_index -= 1
-	        if self.thumbnail_index < 0:
+    	
+    	for label in reversed(self.thumbnail_labels):
+    		if self.thumbnail_index < 0:
 	        	self.thumbnail_index = len(self.thumbnail_pixmaps) - 1
+	        
+	    	label.setPixmap(self.thumbnail_pixmaps[self.thumbnail_index])
+	    	self.thumbnail_index -= 1
+	    
 
 
-    def next_thumbnails(self):
-	    for label in self.thumbnail_labels:
+
+    def cycle_thumbnails_next(self):
+    	self.thumbnail_index += 5
+
+    	for label in self.thumbnail_labels:
+
+    		if self.thumbnail_index >= len(self.thumbnail_pixmaps):
+	    		self.thumbnail_index = 0
+
 	    	label.setPixmap(self.thumbnail_pixmaps[self.thumbnail_index])
 	    	self.thumbnail_index += 1
-
-	    	if self.thumbnail_index >= len(self.thumbnail_pixmaps):
-	    		self.thumbnail_index = 0
 
 
 if __name__ == '__main__':
