@@ -24,18 +24,18 @@ class Model():
         self.image_files.sort()
 
 
-    def next_filename(self):
-        self.fullscreen_index = self.fullscreen_index + 1
+    def next_filename(self, cycles):
+        self.fullscreen_index = self.fullscreen_index + cycles
 
-        if (self.fullscreen_index >= len(self.image_files)):
-            self.fullscreen_index = 0
+        if self.fullscreen_index >= len(self.image_files):
+            self.fullscreen_index = cycles - len(self.image_files)
 
 
-    def prev_filename(self):
-        self.fullscreen_index = self.fullscreen_index - 1
+    def prev_filename(self, cycles):
+        self.fullscreen_index = self.fullscreen_index - cycles
 
         if (self.fullscreen_index < 0):
-            self.fullscreen_index = len(self.image_files) - 1
+            self.fullscreen_index = len(self.image_files) - cycles
 
 
     def get_current_filename(self):
@@ -55,8 +55,8 @@ class Window(QWidget):
         self.view_mode = 'thumbnails'
         self.thumbnail_index = 0
         self.selected_thumbnail = 0
+        self.mode = 'thumbnails'
         self.stylesheet = '''
-                          border: 20px solid black;
                           background: black;
                           '''
 
@@ -80,9 +80,9 @@ class Window(QWidget):
         # hbox for fullscreen
         self.hbox = QHBoxLayout(self)
 
-        #self.setLayout(self.hbox)
+        self.setLayout(self.hbox)
 
-        #self.show_image()
+        self.show_fullscreen()
         self.label.hide()
 
         self.show()
@@ -92,42 +92,54 @@ class Window(QWidget):
         key_pressed = event.key()
 
         if key_pressed == Qt.Key_Right:
-        	self.select_next_thumbnail()
+        	
+        	if self.mode == 'thumbnails':
+        		self.select_next_thumbnail()
+        	
         	self.next_image()
         
         elif key_pressed == Qt.Key_Left:
-        	self.select_prev_thumbnail() 
+        	
+        	if self.mode == 'thumbnails':
+        		self.select_prev_thumbnail() 
+        	
         	self.prev_image()
         
         elif key_pressed == Qt.Key_Up: 
-        	self.label.setPixmap(QPixmap(self.model.get_current_filename()))
-        	self.show_image()
-        	self.label.show()
         	
-        	for label in self.thumbnail_labels:
-        		label.hide()
+        	if self.mode == 'thumbnails':
+        		self.mode = 'fullscreen'
+        		self.show_fullscreen()
+        	
+        		for label in self.thumbnail_labels:
+        			label.hide()
         
         elif key_pressed == Qt.Key_Down:
-        	self.label.hide()
+        	if self.mode == 'fullscreen':
+        		self.mode = 'thumbnails'
+        		self.label.hide()
 
-        	for label in self.thumbnail_labels:
-        		label.show()
+        		for label in self.thumbnail_labels:
+        			label.show()
         
         elif key_pressed == 46:
-        	self.cycle_thumbnails_next()
+        	if self.mode == 'thumbanils':
+        		self.cycle_thumbnails_next()
         
         elif key_pressed == 44:
-        	self.cycle_thumbnails_prev()
+        	if self.mode == 'thumbnails':
+        		self.cycle_thumbnails_prev()
 
 
-    def show_image(self):
+    def show_fullscreen(self):
         self.pixmap = QPixmap(self.model.get_current_filename())       
         self.pixmap = self.pixmap.scaled(CONST_WIDTH, CONST_HEIGHT, Qt.KeepAspectRatio)
         
+        self.label.resize(CONST_WIDTH, CONST_HEIGHT)
         self.label.setPixmap(self.pixmap)
         self.label.setAlignment(Qt.AlignCenter)
+        self.label.show()
 
-        #self.show()
 
     def select_next_thumbnail(self):
     	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('')
@@ -152,20 +164,24 @@ class Window(QWidget):
 
 
     def next_image(self):
-        self.model.next_filename()
-        #self.show_image()
+        self.model.next_filename(1)
+        
+        if self.mode == 'fullscreen':
+        	self.show_fullscreen()
 
 
     def prev_image(self):
-    	self.model.prev_filename()
-    	#self.show_image()
+    	self.model.prev_filename(1)
+    	
+    	if self.mode == 'fullscreen':
+    		self.show_fullscreen()
 
 
     def load_thumbnails(self):
     	# load images into pixmap array
     	for _ in self.model.image_files:
     		self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(100, 100, Qt.KeepAspectRatio))
-    		self.model.next_filename()
+    		self.model.next_filename(5)
 
     	for index in range(0, 5):
     		# init thumbnail labels with corresponding pixmap
