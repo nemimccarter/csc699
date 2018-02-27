@@ -14,7 +14,7 @@ CONST_BORDER = 20
 class Model():
     def __init__(self, dir_name):
         self.image_files = []
-        self.fullscreen_index = 0
+        self.current_image_index = 0
         self.dir_name = dir_name
         
         for (dirpath, dirnames, filenames) in walk(dir_name):
@@ -24,22 +24,22 @@ class Model():
         self.image_files.sort()
 
 
-    def next_filename(self, cycles):
-        self.fullscreen_index = self.fullscreen_index + cycles
+    def next_filename(self):
+        self.current_image_index += 1
 
-        if self.fullscreen_index >= len(self.image_files):
-            self.fullscreen_index = cycles - len(self.image_files)
+        if self.current_image_index >= len(self.image_files):
+            self.current_image_index = 0
 
 
-    def prev_filename(self, cycles):
-        self.fullscreen_index = self.fullscreen_index - cycles
+    def prev_filename(self):
+        self.current_image_index = self.current_image_index
 
-        if (self.fullscreen_index < 0):
-            self.fullscreen_index = len(self.image_files) - cycles
+        if (self.current_image_index < 0):
+            self.current_image_index = len(self.image_files)
 
 
     def get_current_filename(self):
-        return self.dir_name + self.image_files[self.fullscreen_index]
+        return self.dir_name + self.image_files[self.current_image_index]
 
 
 class Window(QWidget):
@@ -48,7 +48,7 @@ class Window(QWidget):
         
         self.title = 'CSC 690 - Project 1'
         self.image_files = []
-        self.fullscreen_index = 0
+        self.current_image_index = 0
         self.model = Model('./data/')
         self.thumbnail_labels = []
         self.thumbnail_pixmaps = []
@@ -96,14 +96,14 @@ class Window(QWidget):
         	if self.mode == 'thumbnails':
         		self.select_next_thumbnail()
         	
-        	self.next_image()
+        	#self.next_image()
         
         elif key_pressed == Qt.Key_Left:
         	
         	if self.mode == 'thumbnails':
         		self.select_prev_thumbnail() 
         	
-        	self.prev_image()
+        	#self.prev_image()
         
         elif key_pressed == Qt.Key_Up: 
         	
@@ -118,6 +118,8 @@ class Window(QWidget):
         	if self.mode == 'fullscreen':
         		self.mode = 'thumbnails'
         		self.label.hide()
+        		# select middle thumbnail
+        		self.select_thumbnail(2)
 
         		for label in self.thumbnail_labels:
         			label.show()
@@ -145,6 +147,8 @@ class Window(QWidget):
     	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('')
     	self.selected_thumbnail += 1
 
+    	self.model.next_filename()
+
     	if self.selected_thumbnail >= 5:
     		self.selected_thumbnail = 0
     		self.cycle_thumbnails_next()
@@ -156,6 +160,8 @@ class Window(QWidget):
     	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('')
     	self.selected_thumbnail -= 1
 
+    	self.model.prev_filename()
+
     	if self.selected_thumbnail < 0:
     		self.selected_thumbnail = 4
     		self.cycle_thumbnails_prev()
@@ -163,15 +169,22 @@ class Window(QWidget):
     	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('border: 5px solid red;')
 
 
+    def select_thumbnail(self, thumbnail_index):
+    	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('')
+    	self.selected_thumbnail = thumbnail_index
+
+    	self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('border: 5px solid red;')
+ 
+
     def next_image(self):
-        self.model.next_filename(1)
+        self.model.next_filename()
         
         if self.mode == 'fullscreen':
         	self.show_fullscreen()
 
 
     def prev_image(self):
-    	self.model.prev_filename(1)
+    	self.model.prev_filename()
     	
     	if self.mode == 'fullscreen':
     		self.show_fullscreen()
@@ -181,7 +194,7 @@ class Window(QWidget):
     	# load images into pixmap array
     	for _ in self.model.image_files:
     		self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(100, 100, Qt.KeepAspectRatio))
-    		self.model.next_filename(5)
+    		self.model.next_filename()
 
     	for index in range(0, 5):
     		# init thumbnail labels with corresponding pixmap
@@ -197,19 +210,23 @@ class Window(QWidget):
 
     def cycle_thumbnails_prev(self):
     	self.thumbnail_index -= 5
-    	
-    	for label in reversed(self.thumbnail_labels):
+
+    	for label in self.thumbnail_labels:
+
     		if self.thumbnail_index < 0:
-	        	self.thumbnail_index = len(self.thumbnail_pixmaps) - 1
+    			self.thumbnail_index = len(self.thumbnail_pixmaps) - 1
+    		elif self.thumbnail_index >= len(self.thumbnail_pixmaps):
+    			self.thumbnail_index = 0
 	        
 	    	label.setPixmap(self.thumbnail_pixmaps[self.thumbnail_index])
-	    	self.thumbnail_index -= 1
+	    	self.thumbnail_index += 1
 	    
-
-
 
     def cycle_thumbnails_next(self):
     	self.thumbnail_index += 5
+
+    	while self.thumbnail_index % 5 != 0:
+    		self.thumbnail_index -= 1
 
     	for label in self.thumbnail_labels:
 
