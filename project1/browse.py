@@ -210,13 +210,14 @@ class Window(QWidget):
         			label.show()
         
         elif key_pressed == 46:
-        	if self.mode == 'thumbnails':
-        		self.cycle_thumbnails_next()
-        
-        elif key_pressed == 44:
-        	if self.mode == 'thumbnails':
-        		self.cycle_thumbnails_prev()
+            if self.mode == 'thumbnails':
+                for _ in range(0, 5):
+                    self.select_next_thumbnail()
 
+        elif key_pressed == 44:
+            if self.mode == 'thumbnails':
+                for _ in range(0, 5):
+                    self.select_prev_thumbnail()
 
     def show_fullscreen(self):
         self.pixmap = QPixmap(self.model.get_current_filename())       
