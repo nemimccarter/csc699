@@ -81,6 +81,10 @@ class Model():
         return self.dir_name + self.image_files[self.current_index]
 
 
+    def get_current_index(self):
+        return self.current_index
+
+
     def get_tags(self, current_node):
     	return current_node.tags
 
@@ -224,10 +228,6 @@ class Window(QWidget):
         self.label.show()
 
 
-    def get_current_index(self):
-        return self.model.current_index
-
-
     def set_current_index(self, new_index):
         self.model.current_index = new_index
 
@@ -244,39 +244,32 @@ class Window(QWidget):
 
     def select_next_thumbnail(self):
         # remove red highlight from current selection
-        self.thumbnail_labels[self.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-        self.set_current_index(self.get_current_index() + 1)
+        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
+        self.set_current_index(self.model.get_current_index() + 1)
 
-        if self.get_current_index() > self.model.get_leftmost_index() + 4:
+        if self.model.get_current_index() > self.model.get_leftmost_index() + 4:
 
-            if self.get_current_index() >= len(self.model.image_files) - 1:
+            if self.model.get_current_index() >= len(self.model.image_files) - 1:
                 self.set_current_index(0)
 
-            self.model.set_leftmost_index(self.get_current_index())
-            self.set_leftmost_index(self.get_current_index())
+            self.model.set_leftmost_index(self.model.get_current_index())
 
             self.reload_thumbnails()
 
-        self.thumbnail_labels[self.get_current_index() - self.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
+        self.thumbnail_labels[self.model.get_current_index() - self.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
 
 
     def select_prev_thumbnail(self):       
         # remove red highlight from current 
-        self.thumbnail_labels[self.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-        self.set_current_index(self.get_current_index() - 1)
+        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
+        self.set_current_index(self.model.get_current_index() - 1)
 
-        if self.get_current_index() < self.model.get_leftmost_index():
-            self.model.set_leftmost_index(self.get_current_index() - 4)
-            self.set_current_index(self.model.get_leftmost_index())
+        if self.model.get_current_index() < self.model.get_leftmost_index():
+            self.model.set_leftmost_index(self.model.get_current_index() - 4)
+            self.set_current_index(self.model.get_leftmost_index() + 4)
             self.reload_thumbnails()
 
-        print("Current index: " + str(self.get_current_index()))
-        print("leftmost index: " + str(self.model.get_leftmost_index()))
-
-        self.thumbnail_labels[self.get_current_index() - self.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
-        #debug
-        print("current index: " + str(self.get_current_index()))
-        print("leftmost index: " + str(self.get_leftmost_index()))
+        self.thumbnail_labels[self.model.get_current_index() - self.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
 
 
     def select_thumbnail(self, thumbnail_index):
