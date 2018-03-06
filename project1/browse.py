@@ -85,6 +85,10 @@ class Model():
         return self.current_index
 
 
+    def set_current_index(self, new_index):
+        self.current_index = new_index
+
+
     def get_tags(self, current_node):
         return current_node.tags
 
@@ -208,7 +212,7 @@ class Window(QWidget):
                 self.mode = 'thumbnails'
                 self.label.hide()
                 # select middle thumbnail
-                # self.select_thumbnail(self.get_leftmost_index() + 2)
+                # self.select_thumbnail(self.model.get_leftmost_index() + 2)
 
                 for label in self.thumbnail_labels:
                     label.show()
@@ -218,7 +222,7 @@ class Window(QWidget):
                 for _ in range(0, 5):
                     self.next_image()
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-                self.set_current_index(self.model.get_leftmost_index())
+                self.model.set_current_index(self.model.get_leftmost_index())
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
 
         elif key_pressed == 44:
@@ -226,7 +230,7 @@ class Window(QWidget):
                 for _ in range(0, 5):
                     self.prev_image()
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-                self.set_current_index(self.model.get_leftmost_index())
+                self.model.set_current_index(self.model.get_leftmost_index())
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
 
 
@@ -240,45 +244,31 @@ class Window(QWidget):
         self.label.show()
 
 
-    def set_current_index(self, new_index):
-        self.model.current_index = new_index
-
-    
-    def get_leftmost_index(self):
-        return self.model.leftmost_index
-
-
-    def set_leftmost_index(self, new_index):
-        if new_index < 0:
-            new_index = len(self.model.image_files - 5)
-        self.model.leftmost_index = new_index
-
-
     def next_image(self):
         # remove red highlight from current selection
         self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-        self.set_current_index(self.model.get_current_index() + 1)
+        self.model.set_current_index(self.model.get_current_index() + 1)
 
         self.check_index_bounds()
         self.reload_thumbnails()
 
-        self.thumbnail_labels[self.model.get_current_index() - self.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
+        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
 
 
     def prev_image(self):       
         # remove red highlight from current 
         self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-        self.set_current_index(self.model.get_current_index() - 1)
+        self.model.set_current_index(self.model.get_current_index() - 1)
 
         self.check_index_bounds()
         self.reload_thumbnails()
 
-        self.thumbnail_labels[self.model.get_current_index() - self.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
+        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
 
 
     def select_thumbnail(self, thumbnail_index):
         self.thumbnail_labels[self.model.get_current_index()].setStyleSheet('')
-        self.set_current_index(thumbnail_index)
+        self.model.set_current_index(thumbnail_index)
         self.check_index_bounds()
 
         self.thumbnail_labels[self.model.get_current_index()].setStyleSheet('border: 5px solid red;')
@@ -289,13 +279,13 @@ class Window(QWidget):
         if self.model.get_current_index() > self.model.get_leftmost_index() + 4:
 
             if self.model.get_current_index() >= len(self.model.image_files) - 1:
-                self.set_current_index(0)
+                self.model.set_current_index(0)
 
             self.model.set_leftmost_index(self.model.get_current_index())
         
         elif self.model.get_current_index() < self.model.get_leftmost_index():
             self.model.set_leftmost_index(self.model.get_current_index() - 4)
-            self.set_current_index(self.model.get_leftmost_index() + 4)
+            self.model.set_current_index(self.model.get_leftmost_index() + 4)
 
 
     def load_thumbnails(self):
