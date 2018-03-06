@@ -179,7 +179,7 @@ class Window(QWidget):
         if key_pressed == Qt.Key_Right:
             
             if self.mode == 'thumbnails':
-                self.select_next_thumbnail()
+                self.next_image()
 
             elif self.mode == 'fullscreen':
                 self.next_image()
@@ -188,7 +188,7 @@ class Window(QWidget):
         elif key_pressed == Qt.Key_Left:
             
             if self.mode == 'thumbnails':
-                self.select_prev_thumbnail()
+                self.prev_image()
           
             elif self.mode == 'fullscreen':
                 self.prev_image()
@@ -216,7 +216,7 @@ class Window(QWidget):
         elif key_pressed == 46:
             if self.mode == 'thumbnails':
                 for _ in range(0, 5):
-                    self.select_next_thumbnail()
+                    self.next_image()
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
                 self.set_current_index(self.model.get_leftmost_index())
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
@@ -224,7 +224,7 @@ class Window(QWidget):
         elif key_pressed == 44:
             if self.mode == 'thumbnails':
                 for _ in range(0, 5):
-                    self.select_prev_thumbnail()
+                    self.prev_image()
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
                 self.set_current_index(self.model.get_leftmost_index())
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
@@ -254,7 +254,7 @@ class Window(QWidget):
         self.model.leftmost_index = new_index
 
 
-    def select_next_thumbnail(self):
+    def next_image(self):
         # remove red highlight from current selection
         self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
         self.set_current_index(self.model.get_current_index() + 1)
@@ -265,7 +265,7 @@ class Window(QWidget):
         self.thumbnail_labels[self.model.get_current_index() - self.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
 
 
-    def select_prev_thumbnail(self):       
+    def prev_image(self):       
         # remove red highlight from current 
         self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
         self.set_current_index(self.model.get_current_index() - 1)
@@ -296,16 +296,6 @@ class Window(QWidget):
         elif self.model.get_current_index() < self.model.get_leftmost_index():
             self.model.set_leftmost_index(self.model.get_current_index() - 4)
             self.set_current_index(self.model.get_leftmost_index() + 4)
-
-
-    def next_image(self):
-        self.set_current_index(self.model.get_current_index() + 1)
-        self.check_index_bounds()
-
-
-    def prev_image(self):
-        self.set_current_index(self.model.get_current_index() - 1)
-        self.check_index_bounds()
 
 
     def load_thumbnails(self):
