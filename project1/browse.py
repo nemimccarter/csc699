@@ -173,7 +173,7 @@ class Window(QWidget):
     def check_index_bounds(self):
         if self.model.get_current_index() > self.model.get_leftmost_index() + 4:
 
-            if self.model.get_current_index() >= len(self.model.image_files) - 1:
+            if self.model.get_current_index() >= len(self.model.nodes) - 1:
                 self.model.set_current_index(0)
 
             self.model.set_leftmost_index(self.model.get_current_index())

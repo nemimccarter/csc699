@@ -43,11 +43,16 @@ class Model():
         self.dir_name = dir_name
         self.all_tags = []
 
+        # load images into self.image_files
         for (dirpath, dirnames, filenames) in walk(dir_name):
             self.image_files.extend(filenames)
             break
         
         self.image_files.sort()
+
+        # create self.nodes from self.image_files
+        for image in self.image_files:
+            self.add_node(image)
 
         self.load_tags('tags.txt')
         #for image in image_files:
