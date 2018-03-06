@@ -183,6 +183,7 @@ class Window(QWidget):
 
             elif self.mode == 'fullscreen':
                 self.next_image()
+                self.show_fullscreen()
         
         elif key_pressed == Qt.Key_Left:
             
@@ -191,6 +192,7 @@ class Window(QWidget):
           
             elif self.mode == 'fullscreen':
                 self.prev_image()
+                self.show_fullscreen()
         
         elif key_pressed == Qt.Key_Up: 
             
@@ -206,7 +208,7 @@ class Window(QWidget):
                 self.mode = 'thumbnails'
                 self.label.hide()
                 # select middle thumbnail
-                #self.select_thumbnail(2)
+                # self.select_thumbnail(self.get_leftmost_index() + 2)
 
                 for label in self.thumbnail_labels:
                     label.show()
@@ -215,11 +217,18 @@ class Window(QWidget):
             if self.mode == 'thumbnails':
                 for _ in range(0, 5):
                     self.select_next_thumbnail()
+                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
+                self.set_current_index(self.model.get_leftmost_index())
+                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
 
         elif key_pressed == 44:
             if self.mode == 'thumbnails':
                 for _ in range(0, 5):
                     self.select_prev_thumbnail()
+                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
+                self.set_current_index(self.model.get_leftmost_index())
+                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
+
 
     def show_fullscreen(self):
         self.pixmap = QPixmap(self.model.get_current_filename())       
@@ -268,11 +277,13 @@ class Window(QWidget):
 
 
     def select_thumbnail(self, thumbnail_index):
-        self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('')
-        self.selected_thumbnail = thumbnail_index
+        self.thumbnail_labels[self.model.get_current_index()].setStyleSheet('')
+        self.set_current_index(thumbnail_index)
+        self.check_index_bounds()
 
-        self.thumbnail_labels[self.selected_thumbnail].setStyleSheet('border: 5px solid red;')
- 
+        self.thumbnail_labels[self.model.get_current_index()].setStyleSheet('border: 5px solid red;')
+        self.reload_thumbnails()
+
 
     def check_index_bounds(self):
         if self.model.get_current_index() > self.model.get_leftmost_index() + 4:
@@ -288,20 +299,14 @@ class Window(QWidget):
 
 
     def next_image(self):
-        '''
-        self.model.next_filename()
-        
-        if self.mode == 'fullscreen':
-            self.show_fullscreen()
-        '''
+        self.set_current_index(self.model.get_current_index() + 1)
+        self.check_index_bounds()
+
 
     def prev_image(self):
-        '''
-        self.model.prev_filename()
-        
-        if self.mode == 'fullscreen':
-            self.show_fullscreen()
-        '''
+        self.set_current_index(self.model.get_current_index() - 1)
+        self.check_index_bounds()
+
 
     def load_thumbnails(self):
         # load images into pixmap array
