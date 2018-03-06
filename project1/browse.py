@@ -8,117 +8,12 @@ from os.path import isfile, join
 import sys
 import click
 
+from Model import *
+
 CONST_WIDTH = 800
 CONST_HEIGHT = 600
 CONST_BORDER = 20
 CONST_THUMBNAIL_COUNT = 5
-
-
-class Image_Node():
-    def __init__(self, image, index, tags):
-        self.image = image
-        self.index = index
-        self.tags = []
-
-        self.add_tags(tags)
-
-
-    def add_tags(self, tags):
-        for tag in tags:
-            self.tags.append(tag)
-
-    def read_tags(self, filename):
-        print("reading")
-
-class Model():
-    def __init__(self, dir_name):
-        self.image_files = []
-        self.nodes = []
-
-        self.current_index = 0
-        self.leftmost_index = 0
-        
-        self.dir_name = dir_name
-        self.all_tags = []
-
-        for (dirpath, dirnames, filenames) in walk(dir_name):
-            self.image_files.extend(filenames)
-            break
-        
-        self.image_files.sort()
-
-        self.load_tags('tags.txt')
-        #for image in image_files:
-        #   self.add_node_image(image)
-
-        for tag in self.all_tags:
-            self.add_tags(tag)
-
-
-    def add_node_image(self, image):
-        self.nodes.append(image)
-
-
-    def add_tags(tags):
-        for node in self.nodes:
-            node.add_tag(tag)
-
-
-    def next_filename(self):
-        self.current_index += 1
-
-        if self.current_index >= len(self.image_files):
-            self.current_index = 0
-
-
-    def prev_filename(self):
-        self.current_index -= 1
-
-        if (self.current_index < 0):
-            self.current_index = len(self.image_files) - 1
-
-    def get_current_filename(self):
-        return self.dir_name + self.image_files[self.current_index]
-
-
-    def get_current_index(self):
-        return self.current_index
-
-
-    def set_current_index(self, new_index):
-        self.current_index = new_index
-
-
-    def get_tags(self, current_node):
-        return current_node.tags
-
-
-    def save_tags(self, save_filename):
-        save_file = open(save_filename, 'w')
-
-        for node in nodes:
-            json.dump(node.get_tags, save_file)
-
-        save_file.close()
-
-
-    def load_tags(self, save_filename):
-        save_file = open(save_filename, 'r')
-        #self.all_tags = json.load(save_file)
-
-        #for all_tags, node in zip(all_tags, self.nodes):
-        #   node.add_tags(all_tags)
-
-    def get_leftmost_index(self):
-        return self.leftmost_index
-
-    def set_leftmost_index(self, new_index):
-        if new_index > len(self.image_files) - 6:
-            new_index = 0
-        elif new_index < 0:
-            new_index = len(self.image_files) - 6
-
-        self.leftmost_index = new_index
 
 
 class Window(QWidget):
@@ -142,9 +37,8 @@ class Window(QWidget):
         self.tag_field.setFocusPolicy(Qt.ClickFocus)
         self.tags_label = QLabel(self)        
 
-        self.stylesheet = '''
-                          background: solid black;
-                          '''
+        self.stylesheet = 'background: solid black;'
+        self.selected_thumbnail_stylsheet = 'border: 5px solid red;'
 
         self.initUI()
 
@@ -161,7 +55,7 @@ class Window(QWidget):
         self.label.setStyleSheet(self.stylesheet)
         self.label.setFrameShape(QFrame.StyledPanel)
 
-        self.thumbnail_labels[0].setStyleSheet('border: 5px solid red;')
+        self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylsheet)
 
         # hbox for fullscreen
         self.hbox = QHBoxLayout(self)
@@ -223,7 +117,7 @@ class Window(QWidget):
                     self.next_image()
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
                 self.model.set_current_index(self.model.get_leftmost_index())
-                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
+                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
 
         elif key_pressed == 44:
             if self.mode == 'thumbnails':
@@ -231,7 +125,7 @@ class Window(QWidget):
                     self.prev_image()
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
                 self.model.set_current_index(self.model.get_leftmost_index())
-                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
+                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
 
 
     def show_fullscreen(self):
@@ -252,7 +146,7 @@ class Window(QWidget):
         self.check_index_bounds()
         self.reload_thumbnails()
 
-        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
+        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
 
 
     def prev_image(self):       
@@ -263,7 +157,7 @@ class Window(QWidget):
         self.check_index_bounds()
         self.reload_thumbnails()
 
-        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('border: 5px solid red;')
+        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
 
 
     def select_thumbnail(self, thumbnail_index):
@@ -271,7 +165,7 @@ class Window(QWidget):
         self.model.set_current_index(thumbnail_index)
         self.check_index_bounds()
 
-        self.thumbnail_labels[self.model.get_current_index()].setStyleSheet('border: 5px solid red;')
+        self.thumbnail_labels[self.model.get_current_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
         self.reload_thumbnails()
 
 
