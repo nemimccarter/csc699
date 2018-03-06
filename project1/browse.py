@@ -21,16 +21,12 @@ class Window(QWidget):
         super().__init__()
         
         self.title = 'CSC 690 - Project 1'
-        self.image_files = []
-        self.current_index = 0
         self.model = Model('./data/')
         
         self.thumbnail_labels = []
         self.thumbnail_pixmaps = []
-        self.thumbnail_index = 0
         
         self.view_mode = 'thumbnails'
-        self.selected_thumbnail = 0
         self.mode = 'thumbnails'
         
         self.tag_field = QLineEdit(self)
@@ -38,7 +34,7 @@ class Window(QWidget):
         self.tags_label = QLabel(self)        
 
         self.stylesheet = 'background: solid black;'
-        self.selected_thumbnail_stylsheet = 'border: 5px solid red;'
+        self.selected_thumbnail_stylesheet = 'border: 5px solid red;'
 
         self.initUI()
 
@@ -54,8 +50,10 @@ class Window(QWidget):
         self.label = QLabel(self)
         self.label.setStyleSheet(self.stylesheet)
         self.label.setFrameShape(QFrame.StyledPanel)
+        self.label.resize(CONST_WIDTH, CONST_HEIGHT)
+        self.label.setAlignment(Qt.AlignCenter)
 
-        self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylsheet)
+        self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylesheet)
 
         # hbox for fullscreen
         self.hbox = QHBoxLayout(self)
@@ -102,6 +100,7 @@ class Window(QWidget):
                     label.hide()
         
         elif key_pressed == Qt.Key_Down:
+            
             if self.mode == 'fullscreen':
                 self.mode = 'thumbnails'
                 self.label.hide()
@@ -113,28 +112,30 @@ class Window(QWidget):
         
         elif key_pressed == 46:
             if self.mode == 'thumbnails':
+
                 for _ in range(0, 5):
                     self.next_image()
+
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
                 self.model.set_current_index(self.model.get_leftmost_index())
-                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
+                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
         elif key_pressed == 44:
             if self.mode == 'thumbnails':
+
                 for _ in range(0, 5):
                     self.prev_image()
+
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
                 self.model.set_current_index(self.model.get_leftmost_index())
-                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
+                self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
     def show_fullscreen(self):
         self.pixmap = QPixmap(self.model.get_current_filename())       
         self.pixmap = self.pixmap.scaled(CONST_WIDTH, CONST_HEIGHT, Qt.KeepAspectRatio)
         
-        self.label.resize(CONST_WIDTH, CONST_HEIGHT)
         self.label.setPixmap(self.pixmap)
-        self.label.setAlignment(Qt.AlignCenter)
         self.label.show()
 
 
@@ -146,7 +147,7 @@ class Window(QWidget):
         self.check_index_bounds()
         self.reload_thumbnails()
 
-        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
+        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
     def prev_image(self):       
@@ -157,7 +158,7 @@ class Window(QWidget):
         self.check_index_bounds()
         self.reload_thumbnails()
 
-        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
+        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
     def select_thumbnail(self, thumbnail_index):
@@ -165,7 +166,7 @@ class Window(QWidget):
         self.model.set_current_index(thumbnail_index)
         self.check_index_bounds()
 
-        self.thumbnail_labels[self.model.get_current_index()].setStyleSheet(self.selected_thumbnail_stylsheet)
+        self.thumbnail_labels[self.model.get_current_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
         self.reload_thumbnails()
 
 
