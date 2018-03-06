@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QFrame, QHBoxLayout, QApplication)
+from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QPushButton, QFrame, QHBoxLayout, QApplication)
 from PyQt5.QtGui import QPixmap
 import json
 
@@ -31,8 +31,12 @@ class Window(QWidget):
         
         self.tag_field = QLineEdit(self)
         self.tag_field.setFocusPolicy(Qt.ClickFocus)
-        self.tags_label = QLabel(self)        
+        self.tags_label = QLabel(self)
 
+        self.add_tag_button = QPushButton('Add tag', self)
+        self.save_tags_button = QPushButton('Save all tags', self)
+
+        #self.connect(self.add_tag_button, SIGNAL("clicked()"), self.add_tag())
         self.stylesheet = 'background: solid black;'
         self.selected_thumbnail_stylesheet = 'border: 5px solid red;'
 
@@ -53,6 +57,7 @@ class Window(QWidget):
         self.label.resize(CONST_WIDTH, CONST_HEIGHT)
         self.label.setAlignment(Qt.AlignCenter)
 
+
         self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylesheet)
 
         # hbox for fullscreen
@@ -66,7 +71,16 @@ class Window(QWidget):
         self.tags_label.move(600, 400)
         self.tag_field.move(300, 500)
 
+        self.add_tag_button.move(300, 550)
+        self.add_tag_button.clicked.connect(self.add_tag)
+
+        self.save_tags_button.move(300, 600)
+
         self.show()
+
+
+    def add_tag(self):
+        self.model.add_tag(self.tag_field.text())
 
 
     def keyPressEvent(self, event):
@@ -100,12 +114,10 @@ class Window(QWidget):
                     label.hide()
         
         elif key_pressed == Qt.Key_Down:
-            
+
             if self.mode == 'fullscreen':
                 self.mode = 'thumbnails'
                 self.label.hide()
-                # select middle thumbnail
-                # self.select_thumbnail(self.model.get_leftmost_index() + 2)
 
                 for label in self.thumbnail_labels:
                     label.show()

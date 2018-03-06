@@ -10,12 +10,12 @@ class Image_Node():
         self.image = image
         self.tags = []
 
-        self.add_tags(tags)
+        self.add_tag(tags)
 
 
-    def add_tags(self, tags):
-        for tag in tags:
-            self.tags.append(tag)
+    def add_tag(self, tag):
+        self.tags.append(tag)
+        print("tag appended: " + str(tag))
 
 
     def get_tags(self, filename):
@@ -51,8 +51,12 @@ class Model():
         self.image_files.sort()
 
         # create self.nodes from self.image_files
+        index = 0
         for image in self.image_files:
-            self.add_node(image)
+            new_node = Image_Node(image, index, index)
+            self.add_node(new_node)
+            index += 1
+
 
         self.load_tags('tags.txt')
         #for image in image_files:
@@ -79,8 +83,8 @@ class Model():
 
 
     # adds tags to current node
-    def add_tags(tags):
-        self.nodes[self.current_index].add_tags(tags)
+    def add_tag(self, tag):
+        self.nodes[self.get_current_index()].add_tag(tag)
 
 
     def next_filename(self):
