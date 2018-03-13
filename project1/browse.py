@@ -1,12 +1,7 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QPushButton, QFrame, QHBoxLayout, QApplication)
+from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QPushButton, QFrame, QHBoxLayout, QVBoxLayout, QApplication)
 from PyQt5.QtGui import QPixmap
 import json
-
-from os import listdir, walk
-from os.path import isfile, join
-import sys
-import click
 
 from Model import *
 
@@ -31,13 +26,19 @@ class Window(QWidget):
         
         self.tag_field = QLineEdit(self)
         self.tag_field.setFocusPolicy(Qt.ClickFocus)
+
+        # TODO: remove when self.tag_labels is functional
         self.tags_label = QLabel(self)
+        self.tags_label.setStyleSheet('background: solid blue;')
+
+        self.tag_labels = []
 
         self.add_tag_button = QPushButton('Add tag', self)
         self.save_tags_button = QPushButton('Save all tags', self)
+        self.add_tag_button.setFocusPolicy(Qt.ClickFocus)
+        self.save_tags_button.setFocusPolicy(Qt.ClickFocus)
 
-        #self.connect(self.add_tag_button, SIGNAL("clicked()"), self.add_tag())
-        self.stylesheet = 'background: solid black;'
+        self.stylesheet = ''
         self.selected_thumbnail_stylesheet = 'border: 5px solid red;'
 
         self.initUI()
@@ -54,19 +55,31 @@ class Window(QWidget):
         self.label = QLabel(self)
         self.label.setStyleSheet(self.stylesheet)
         self.label.setFrameShape(QFrame.StyledPanel)
-        self.label.resize(CONST_WIDTH, CONST_HEIGHT)
         self.label.setAlignment(Qt.AlignCenter)
+        self.label.setFocusPolicy(Qt.StrongFocus)
 
+        self.label.resize(CONST_WIDTH, CONST_HEIGHT)
+
+
+        for _ in range(0,10):
+        	self.tag_labels.append(QLabel(self))
+
+        label_index = 1
+        for label in self.tag_labels:
+        	label.setStyleSheet('background: blue;')
+        	label.move(600, 400 - (label_index * 100))
+
+        	label_index += 1
 
         self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylesheet)
 
         # hbox for fullscreen
-        self.hbox = QHBoxLayout(self)
-
-        self.setLayout(self.hbox)
+        #self.hbox = QVBoxLayout(self)
 
         self.show_fullscreen()
         self.label.hide()
+        self.tags_label.hide()
+
 
         self.tags_label.move(600, 400)
         self.tag_field.move(300, 500)
@@ -76,11 +89,14 @@ class Window(QWidget):
 
         self.save_tags_button.move(300, 600)
 
+        self.hide_tags()
         self.show()
 
 
     def add_tag(self):
         self.model.add_tag(self.tag_field.text())
+        self.setFocusPolicy(Qt.ClickFocus)
+
 
 
     def keyPressEvent(self, event):
@@ -108,7 +124,9 @@ class Window(QWidget):
             
             if self.mode == 'thumbnails':
                 self.mode = 'fullscreen'
+
                 self.show_fullscreen()
+                self.show_tags()
             
                 for label in self.thumbnail_labels:
                     label.hide()
@@ -118,6 +136,8 @@ class Window(QWidget):
             if self.mode == 'fullscreen':
                 self.mode = 'thumbnails'
                 self.label.hide()
+                self.tags_label.hide()
+                self.hide_tags()
 
                 for label in self.thumbnail_labels:
                     label.show()
@@ -145,10 +165,27 @@ class Window(QWidget):
 
     def show_fullscreen(self):
         self.pixmap = QPixmap(self.model.get_current_filename())       
-        self.pixmap = self.pixmap.scaled(CONST_WIDTH, CONST_HEIGHT, Qt.KeepAspectRatio)
+        self.pixmap = self.pixmap.scaled(CONST_WIDTH / 2, CONST_HEIGHT / 2, Qt.KeepAspectRatio)
         
         self.label.setPixmap(self.pixmap)
         self.label.show()
+
+        image_tags = self.model.get_tags()
+
+        self.show_tags()
+        
+
+    def show_tags(self):
+    	tags = self.model.get_tags()
+
+    	for label, tag in zip(self.tag_labels, tags):
+            label.setText(str(tag))
+            label.show()
+
+
+    def hide_tags(self):
+        for label in self.tag_labels:
+            label.hide()
 
 
     def next_image(self):

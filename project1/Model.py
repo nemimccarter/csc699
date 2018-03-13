@@ -18,7 +18,7 @@ class Image_Node():
         print("tag appended: " + str(tag))
 
 
-    def get_tags(self, filename):
+    def get_tags(self):
         return self.tags
 
 
@@ -113,8 +113,13 @@ class Model():
         self.current_index = new_index
 
 
-    def get_tags(self, current_node):
-        return current_node.tags
+    def get_tags(self):
+        return self.get_current_node().get_tags()
+        # tags_string = ''
+        # for tag in self.get_current_node().tags:
+        #     tags_string += str(tag)
+        #     tags_string += ' '
+        # return tags_string
 
 
     def save_tags(self, save_filename):
