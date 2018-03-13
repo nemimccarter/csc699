@@ -47,6 +47,7 @@ class Window(QWidget):
     def initUI(self):
         self.setWindowTitle(self.title)
         self.setGeometry(100, 100, CONST_WIDTH, CONST_HEIGHT)
+        self.setStyleSheet('background: #00C0FF;')
 
         # load pixmaps
         self.pixmap = QPixmap(self.model.get_current_filename())
@@ -66,15 +67,12 @@ class Window(QWidget):
 
         label_index = 1
         for label in self.tag_labels:
-        	label.setStyleSheet('background: blue;')
-        	label.move(600, 400 - (label_index * 100))
+        	label.move(600, 400 - (label_index * 30))
+        	label.setStyleSheet('border: 10px black;')
 
         	label_index += 1
 
         self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylesheet)
-
-        # hbox for fullscreen
-        #self.hbox = QVBoxLayout(self)
 
         self.show_fullscreen()
         self.label.hide()
@@ -110,6 +108,7 @@ class Window(QWidget):
             elif self.mode == 'fullscreen':
                 self.next_image()
                 self.show_fullscreen()
+                self.show_tags()
         
         elif key_pressed == Qt.Key_Left:
             
@@ -119,6 +118,7 @@ class Window(QWidget):
             elif self.mode == 'fullscreen':
                 self.prev_image()
                 self.show_fullscreen()
+                self.show_tags()
         
         elif key_pressed == Qt.Key_Up: 
             
@@ -178,6 +178,9 @@ class Window(QWidget):
     def show_tags(self):
     	tags = self.model.get_tags()
 
+    	for label in self.tag_labels:
+    		label.setText('')
+    		
     	for label, tag in zip(self.tag_labels, tags):
             label.setText(str(tag))
             label.show()
