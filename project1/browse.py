@@ -9,6 +9,8 @@ CONST_WIDTH = 800
 CONST_HEIGHT = 600
 CONST_BORDER = 20
 CONST_THUMBNAIL_COUNT = 5
+CONST_THUMBNAIL_SIZE = 100
+CONST_NUM_TAGS = 10
 
 
 class Window(QWidget):
@@ -17,85 +19,79 @@ class Window(QWidget):
         
         self.title = 'CSC 690 - Project 1'
         self.model = Model('./data/')
-        
-        self.thumbnail_labels = []
-        self.thumbnail_pixmaps = []
-        
         self.view_mode = 'thumbnails'
         self.mode = 'thumbnails'
-        
-        self.tag_field = QLineEdit(self)
-        self.tag_field.setFocusPolicy(Qt.ClickFocus)
-
-        # TODO: remove when self.tag_labels is functional
-        self.tags_label = QLabel(self)
-        self.tags_label.setStyleSheet('background: solid blue;')
-
-        self.tag_labels = []
-
-        self.add_tag_button = QPushButton('Add tag', self)
-        self.save_tags_button = QPushButton('Save all tags', self)
-        self.add_tag_button.setFocusPolicy(Qt.ClickFocus)
-        self.save_tags_button.setFocusPolicy(Qt.ClickFocus)
-
         self.stylesheet = ''
         self.selected_thumbnail_stylesheet = 'border: 5px solid red;'
 
-        self.initUI()
+        self.thumbnail_labels = []
+        self.thumbnail_pixmaps = []
+        self.tag_labels = []
+        
+        self.init_labels()
+        self.init_controls()
+        self.init_UI()
 
 
-    def initUI(self):
+    def init_UI(self):
+        self.fullscreen_pixmap = QPixmap(self.model.get_current_filename())
+
         self.setWindowTitle(self.title)
         self.setGeometry(100, 100, CONST_WIDTH, CONST_HEIGHT)
         self.setStyleSheet('background: #00C0FF;')
 
-        # load pixmaps
-        self.pixmap = QPixmap(self.model.get_current_filename())
         self.load_thumbnails()
 
-        self.label = QLabel(self)
-        self.label.setStyleSheet(self.stylesheet)
-        self.label.setFrameShape(QFrame.StyledPanel)
-        self.label.setAlignment(Qt.AlignCenter)
-        self.label.setFocusPolicy(Qt.StrongFocus)
-
-        self.label.resize(CONST_WIDTH, CONST_HEIGHT)
-
-
-        for _ in range(0,10):
-        	self.tag_labels.append(QLabel(self))
-
-        label_index = 1
-        for label in self.tag_labels:
-        	label.move(600, 400 - (label_index * 30))
-        	label.setStyleSheet('border: 10px black;')
-
-        	label_index += 1
-
+        # start with first thumbnail selected
         self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylesheet)
 
-        self.show_fullscreen()
-        self.label.hide()
-        self.tags_label.hide()
+        self.fullscreen_label.hide()
+        self.hide_tags()
+        self.show()
 
 
-        self.tags_label.move(600, 400)
-        self.tag_field.move(300, 500)
+    def init_labels(self):
+        self.fullscreen_label = QLabel(self)
+        
+        self.fullscreen_label.setStyleSheet(self.stylesheet)
+        self.fullscreen_label.setAlignment(Qt.AlignCenter)
+        self.fullscreen_label.setFocusPolicy(Qt.StrongFocus)
 
+        self.fullscreen_label.resize(CONST_WIDTH, CONST_HEIGHT)
+
+        for index in range(0, CONST_NUM_TAGS):
+        	temp_label = QLabel(self)
+        	temp_label.move(600, 400 - (index * 30))
+        	
+        	self.tag_labels.append(temp_label)
+        	
+        	temp_label.hide()
+
+
+    def init_controls(self):
+        self.add_tag_button = QPushButton('Add tag', self)
+        self.add_tag_button.setFocusPolicy(Qt.ClickFocus)
         self.add_tag_button.move(300, 550)
         self.add_tag_button.clicked.connect(self.add_tag)
 
-        self.save_tags_button.move(300, 600)
+        self.save_tags_button = QPushButton('Save all tags', self)
+        self.save_tags_button.setFocusPolicy(Qt.ClickFocus)
+        self.save_tags_button.move(400, 550)
+        self.save_tags_button.clicked.connect(self.save_tags)
 
-        self.hide_tags()
-        self.show()
+        self.tag_field = QLineEdit(self)
+        self.tag_field.setFocusPolicy(Qt.ClickFocus)
+        self.tag_field.move(300, 500)
 
 
     def add_tag(self):
         self.model.add_tag(self.tag_field.text())
         self.setFocusPolicy(Qt.ClickFocus)
+        
 
 
+    def save_tags(self):
+    	self.model.save_tags('tags.py')
 
     def keyPressEvent(self, event):
         key_pressed = event.key()
@@ -135,8 +131,8 @@ class Window(QWidget):
 
             if self.mode == 'fullscreen':
                 self.mode = 'thumbnails'
-                self.label.hide()
-                self.tags_label.hide()
+                self.fullscreen_label.hide()
+
                 self.hide_tags()
 
                 for label in self.thumbnail_labels:
@@ -145,7 +141,7 @@ class Window(QWidget):
         elif key_pressed == 46:
             if self.mode == 'thumbnails':
 
-                for _ in range(0, 5):
+                for _ in range(0, CONST_THUMBNAIL_COUNT):
                     self.next_image()
 
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
@@ -155,7 +151,7 @@ class Window(QWidget):
         elif key_pressed == 44:
             if self.mode == 'thumbnails':
 
-                for _ in range(0, 5):
+                for _ in range(0, CONST_THUMBNAIL_COUNT):
                     self.prev_image()
 
                 self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
@@ -164,11 +160,11 @@ class Window(QWidget):
 
 
     def show_fullscreen(self):
-        self.pixmap = QPixmap(self.model.get_current_filename())       
-        self.pixmap = self.pixmap.scaled(CONST_WIDTH / 2, CONST_HEIGHT / 2, Qt.KeepAspectRatio)
+        self.fullscreen_pixmap = QPixmap(self.model.get_current_filename())       
+        self.fullscreen_pixmap = self.fullscreen_pixmap.scaled(CONST_WIDTH / 2, CONST_HEIGHT / 2, Qt.KeepAspectRatio)
         
-        self.label.setPixmap(self.pixmap)
-        self.label.show()
+        self.fullscreen_label.setPixmap(self.fullscreen_pixmap)
+        self.fullscreen_label.show()
 
         image_tags = self.model.get_tags()
 
@@ -180,7 +176,7 @@ class Window(QWidget):
 
     	for label in self.tag_labels:
     		label.setText('')
-    		
+
     	for label, tag in zip(self.tag_labels, tags):
             label.setText(str(tag))
             label.show()
@@ -199,6 +195,8 @@ class Window(QWidget):
         self.check_index_bounds()
         self.reload_thumbnails()
 
+        print("Current index: " + str(self.model.get_current_index()))
+        print("Leftmost index: " + str(self.model.get_leftmost_index()))
         self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
@@ -223,34 +221,38 @@ class Window(QWidget):
 
 
     def check_index_bounds(self):
-        if self.model.get_current_index() > self.model.get_leftmost_index() + 4:
+        current_index = self.model.get_current_index()
+        leftmost_index = self.model.get_leftmost_index()
 
-            if self.model.get_current_index() >= len(self.model.nodes) - 1:
+        if current_index > leftmost_index + 4:
+
+        	# check if we've reached end of list
+            if current_index >= len(self.model.nodes):
                 self.model.set_current_index(0)
 
             self.model.set_leftmost_index(self.model.get_current_index())
         
-        elif self.model.get_current_index() < self.model.get_leftmost_index():
-            self.model.set_leftmost_index(self.model.get_current_index() - 4)
+        elif current_index < leftmost_index:
+            self.model.set_leftmost_index(current_index - 4)
             self.model.set_current_index(self.model.get_leftmost_index() + 4)
 
 
     def load_thumbnails(self):
         # load images into pixmap array
         for _ in self.model.image_files:
-            self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(100, 100, Qt.KeepAspectRatio))
+            self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
             self.model.next_filename()
 
-        for index in range(0, 5):
+        for index in range(0, CONST_THUMBNAIL_COUNT):
             # init thumbnail labels with corresponding pixmap
             self.thumbnail_labels.append(QLabel(self))
             self.thumbnail_labels[index].setPixmap(self.thumbnail_pixmaps[index])
 
             # positioning labels
-            self.thumbnail_labels[index].resize(100,100)
+            self.thumbnail_labels[index].resize(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE)
             self.thumbnail_labels[index].setAlignment(Qt.AlignCenter)
             # TODO: remove magic numbers below
-            self.thumbnail_labels[index].move(20 + index * 150 + (index * 20), (CONST_HEIGHT - 100) / 2)
+            self.thumbnail_labels[index].move(10 + index * 150 + (index * 20), (CONST_HEIGHT - CONST_THUMBNAIL_SIZE) / 2)
 
 
     def reload_thumbnails(self):
