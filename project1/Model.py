@@ -3,6 +3,7 @@ from os import listdir, walk
 from os.path import isfile, join
 import sys
 import click
+import json
 
 
 class Image_Node():
@@ -58,9 +59,7 @@ class Model():
             index += 1
 
 
-        self.load_tags('tags.txt')
-        #for image in image_files:
-        #   self.add_node_image(image)
+        self.load_tags('tags.py')
 
         for tag in self.all_tags:
             self.add_tags(tag)
@@ -124,20 +123,22 @@ class Model():
 
     def save_tags(self, save_filename):
         save_file = open(save_filename, 'w')
+        tags_list = []
 
-        for node in nodes:
-            json.dump(node.get_tags, save_file)
+        for node in self.nodes:
+            tags_list.append(node.get_tags())
+
+        save_file.write("%s\n" % tags_list)
 
         save_file.close()
 
 
     def load_tags(self, save_filename):
-        save_file = open(save_filename, 'r')
-        #self.all_tags = json.load(save_file)
+        save_filename = open(save_filename, 'r')
+        all_tags = save_filename.read()
 
-        #for all_tags, node in zip(all_tags, self.nodes):
-        #   node.add_tags(all_tags)
-
+        #for tag, node in zip(all_tags, self.nodes):
+            #node.add_tag(tag)
 
     def get_leftmost_index(self):
         return self.leftmost_index
