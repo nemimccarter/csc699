@@ -91,7 +91,7 @@ class Window(QWidget):
 
 
     def save_tags(self):
-    	self.model.save_tags('tags.py')
+    	self.model.save_tags('tags.txt')
 
     def keyPressEvent(self, event):
         key_pressed = event.key()

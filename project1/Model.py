@@ -51,15 +51,25 @@ class Model():
         
         self.image_files.sort()
 
+        # WARNING: Tags may only be one word
+        saved_tags_string = self.load_tags('tags.txt')
+        saved_tags = saved_tags_string.split('\n')
+
+        # append empty strings to match length of image_files
+        if len(self.image_files) > len(saved_tags):
+            for index in range(len(saved_tags) - 1, len(self.image_files) - 1):
+                saved_tags.append('')
+
         # create self.nodes from self.image_files
         index = 0
-        for image in self.image_files:
-            new_node = Image_Node(image, index, index)
+        for image, tag_string in zip(self.image_files, saved_tags):
+            new_node = Image_Node(image, index, '')
+            
+            for tag in tag_string.split(', '):
+                new_node.add_tag(tag)
+            
             self.add_node(new_node)
             index += 1
-
-
-        self.load_tags('tags.py')
 
         for tag in self.all_tags:
             self.add_tags(tag)
@@ -123,22 +133,28 @@ class Model():
 
     def save_tags(self, save_filename):
         save_file = open(save_filename, 'w')
-        tags_list = []
+        tags_list = ''
 
         for node in self.nodes:
-            tags_list.append(node.get_tags())
+            node_tags = node.get_tags()
+            node_tags.remove('')
+            
+            node_tags_string = ', '.join(str(tag) for tag in node_tags)
+            tags_list += node_tags_string + '\n'
 
         save_file.write("%s\n" % tags_list)
 
         save_file.close()
+        print("Tags saved")
 
 
     def load_tags(self, save_filename):
         save_filename = open(save_filename, 'r')
         all_tags = save_filename.read()
 
+        return all_tags
         #for tag, node in zip(all_tags, self.nodes):
-            #node.add_tag(tag)
+        #    node.add_tag(tag)
 
     def get_leftmost_index(self):
         return self.leftmost_index
