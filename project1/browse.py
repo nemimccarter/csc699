@@ -172,12 +172,13 @@ class Window(QWidget):
         
 
     def show_tags(self):
-    	tags = self.model.get_tags()
+        tags = self.model.get_tags()
 
-    	for label in self.tag_labels:
-    		label.setText('')
+        for label in self.tag_labels:
+            label.setText('')
 
-    	for label, tag in zip(self.tag_labels, tags):
+        for label, tag in zip(self.tag_labels, tags):
+            label.hide()
             label.setText(str(tag))
             label.show()
 
