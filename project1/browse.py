@@ -227,7 +227,7 @@ class Window(QWidget):
         if current_index > leftmost_index + 4:
 
         	# check if we've reached end of list
-            if current_index >= len(self.model.nodes):
+            if current_index >= len(self.model.nodes) - 1:
                 self.model.set_current_index(0)
 
             self.model.set_leftmost_index(self.model.get_current_index())
