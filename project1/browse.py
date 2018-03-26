@@ -74,24 +74,30 @@ class Window(QWidget):
         self.add_tag_button.move(300, 550)
         self.add_tag_button.clicked.connect(self.add_tag)
 
+        self.add_tag_button.hide()
+
         self.save_tags_button = QPushButton('Save all tags', self)
         self.save_tags_button.setFocusPolicy(Qt.ClickFocus)
         self.save_tags_button.move(400, 550)
         self.save_tags_button.clicked.connect(self.save_tags)
 
+        self.save_tags_button.hide()
+
         self.tag_field = QLineEdit(self)
         self.tag_field.setFocusPolicy(Qt.ClickFocus)
         self.tag_field.move(300, 500)
+
+        self.tag_field.hide()
 
 
     def add_tag(self):
         self.model.add_tag(self.tag_field.text())
         self.setFocusPolicy(Qt.ClickFocus)
-        
 
 
     def save_tags(self):
     	self.model.save_tags('tags.txt')
+
 
     def keyPressEvent(self, event):
         key_pressed = event.key()
@@ -123,6 +129,10 @@ class Window(QWidget):
 
                 self.show_fullscreen()
                 self.show_tags()
+
+                self.add_tag_button.show()
+                self.save_tags_button.show()
+                self.tag_field.show()
             
                 for label in self.thumbnail_labels:
                     label.hide()
@@ -132,6 +142,10 @@ class Window(QWidget):
             if self.mode == 'fullscreen':
                 self.mode = 'thumbnails'
                 self.fullscreen_label.hide()
+
+                self.add_tag_button.hide()
+                self.save_tags_button.hide()
+                self.tag_field.hide()
 
                 self.hide_tags()
 
