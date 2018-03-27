@@ -1,12 +1,10 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import (Qt, QUrl)
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit, QPushButton, QFrame, QHBoxLayout, QVBoxLayout, QApplication)
 from PyQt5.QtGui import QPixmap
-import json
+from PyQt5.QtMultimedia import QSoundEffect
 
 from Model import *
 
-CONST_WIDTH = 800
-CONST_HEIGHT = 600
 CONST_BORDER = 20
 CONST_THUMBNAIL_COUNT = 5
 CONST_THUMBNAIL_SIZE = 100
@@ -27,17 +25,29 @@ class Window(QWidget):
         self.thumbnail_labels = []
         self.thumbnail_pixmaps = []
         self.tag_labels = []
+
+        self.window_width = 800
+        self.window_height = 600
+
+        if len(sys.argv) > 1:
+        	if int(sys.argv[1]) >= 600 and int(sys.argv[1]) <= 1200:
+        		self.window_width = int(sys.argv[1])
+        		self.window_height = self.window_width * (3/4)
+        	else:
+        		print("Given width out of range. Defaulting to 600.")
+
         
         self.init_labels()
         self.init_controls()
         self.init_UI()
+        self.init_sounds()
 
 
     def init_UI(self):
         self.fullscreen_pixmap = QPixmap(self.model.get_current_filename())
 
         self.setWindowTitle(self.title)
-        self.setGeometry(100, 100, CONST_WIDTH, CONST_HEIGHT)
+        self.setGeometry(100, 100, self.window_width, self.window_height)
         self.setStyleSheet('background: #00C0FF;')
 
         self.load_thumbnails()
@@ -53,20 +63,20 @@ class Window(QWidget):
     def init_labels(self):
         self.fullscreen_label = QLabel(self)
 
-        self.fullscreen_label.resize(CONST_WIDTH / 2, CONST_HEIGHT / 2)
+        self.fullscreen_label.resize(self.window_width / 2, self.window_height / 2)
         self.fullscreen_label.setStyleSheet(self.selected_thumbnail_stylesheet)
         self.fullscreen_label.setAlignment(Qt.AlignCenter)
         self.fullscreen_label.setFocusPolicy(Qt.StrongFocus)
-        self.fullscreen_label.move((CONST_WIDTH - (CONST_WIDTH / 2)) / 2, (CONST_HEIGHT - (CONST_HEIGHT/ 2)) /2)
+        self.fullscreen_label.move((self.window_width - (self.window_width / 2)) / 2, (self.window_height - (self.window_height/ 2)) /2)
 
 
         for index in range(0, CONST_NUM_TAGS):
-        	temp_label = QLabel(self)
-        	temp_label.move(650, 400 - (index * 30))
-        	
-        	self.tag_labels.append(temp_label)
-        	
-        	temp_label.hide()
+            temp_label = QLabel(self)
+            temp_label.move(650, 400 - (index * 30))
+        
+            self.tag_labels.append(temp_label)
+        
+            temp_label.hide()
 
 
     def init_controls(self):
@@ -90,6 +100,16 @@ class Window(QWidget):
 
         self.tag_field.hide()
 
+
+    def init_sounds(self):
+        self.train_sound = QSoundEffect()
+        self.train_sound.setSource(QUrl.fromLocalFile('./audio/TRAIN06.WAV'))
+        self.train_sound.setVolume(0.5)
+
+        self.explosion_sound = QSoundEffect()
+        self.explosion_sound.setSource(QUrl.fromLocalFile('./audio/CONK.WAV'))
+        self.explosion_sound.setVolume(0.5)
+    
 
     def add_tag(self):
         self.model.add_tag(self.tag_field.text())
@@ -132,6 +152,8 @@ class Window(QWidget):
                 self.show_fullscreen()
                 self.show_tags()
 
+                self.explosion_sound.play()
+
                 self.add_tag_button.show()
                 self.save_tags_button.show()
                 self.tag_field.show()
@@ -145,6 +167,8 @@ class Window(QWidget):
                 self.mode = 'thumbnails'
                 self.fullscreen_label.hide()
 
+                self.explosion_sound.play()
+
                 self.add_tag_button.hide()
                 self.save_tags_button.hide()
                 self.tag_field.hide()
@@ -157,6 +181,8 @@ class Window(QWidget):
         elif key_pressed == 46:
             if self.mode == 'thumbnails':
 
+                self.train_sound.play()
+
                 for _ in range(0, CONST_THUMBNAIL_COUNT):
                     self.next_image()
 
@@ -166,6 +192,8 @@ class Window(QWidget):
 
         elif key_pressed == 44:
             if self.mode == 'thumbnails':
+
+                self.train_sound.play()
 
                 for _ in range(0, CONST_THUMBNAIL_COUNT):
                     self.prev_image()
@@ -177,7 +205,7 @@ class Window(QWidget):
 
     def show_fullscreen(self):
         self.fullscreen_pixmap = QPixmap(self.model.get_current_filename())       
-        self.fullscreen_pixmap = self.fullscreen_pixmap.scaled(CONST_WIDTH / 2, CONST_HEIGHT / 2, Qt.KeepAspectRatio)
+        self.fullscreen_pixmap = self.fullscreen_pixmap.scaled(self.window_width / 2, self.window_height / 2, Qt.KeepAspectRatio)
         
         self.fullscreen_label.setPixmap(self.fullscreen_pixmap)
         self.fullscreen_label.show()
@@ -267,7 +295,7 @@ class Window(QWidget):
             self.thumbnail_labels[index].resize(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE)
             self.thumbnail_labels[index].setAlignment(Qt.AlignCenter)
             # TODO: remove magic numbers below
-            self.thumbnail_labels[index].move(10 + index * 150 + (index * 20), (CONST_HEIGHT - CONST_THUMBNAIL_SIZE) / 2)
+            self.thumbnail_labels[index].move((self.window_width / (self.window_width / 10)) + index * self.window_width / 5, (self.window_height - CONST_THUMBNAIL_SIZE) / 2)
 
 
     def reload_thumbnails(self):
