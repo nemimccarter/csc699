@@ -16,7 +16,6 @@ class Image_Node():
 
     def add_tag(self, tag):
         self.tags.append(tag)
-        print("tag appended: " + str(tag))
 
 
     def get_tags(self):

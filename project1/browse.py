@@ -94,6 +94,7 @@ class Window(QWidget):
     def add_tag(self):
         self.model.add_tag(self.tag_field.text())
         self.setFocusPolicy(Qt.ClickFocus)
+        self.show_tags()
 
 
     def save_tags(self):
