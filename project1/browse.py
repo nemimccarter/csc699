@@ -52,16 +52,17 @@ class Window(QWidget):
 
     def init_labels(self):
         self.fullscreen_label = QLabel(self)
-        
-        self.fullscreen_label.setStyleSheet(self.stylesheet)
+
+        self.fullscreen_label.resize(CONST_WIDTH / 2, CONST_HEIGHT / 2)
+        self.fullscreen_label.setStyleSheet(self.selected_thumbnail_stylesheet)
         self.fullscreen_label.setAlignment(Qt.AlignCenter)
         self.fullscreen_label.setFocusPolicy(Qt.StrongFocus)
+        self.fullscreen_label.move((CONST_WIDTH - (CONST_WIDTH / 2)) / 2, (CONST_HEIGHT - (CONST_HEIGHT/ 2)) /2)
 
-        self.fullscreen_label.resize(CONST_WIDTH, CONST_HEIGHT)
 
         for index in range(0, CONST_NUM_TAGS):
         	temp_label = QLabel(self)
-        	temp_label.move(600, 400 - (index * 30))
+        	temp_label.move(650, 400 - (index * 30))
         	
         	self.tag_labels.append(temp_label)
         	
@@ -179,8 +180,6 @@ class Window(QWidget):
         
         self.fullscreen_label.setPixmap(self.fullscreen_pixmap)
         self.fullscreen_label.show()
-
-        image_tags = self.model.get_tags()
 
         self.show_tags()
         
