@@ -5,8 +5,7 @@ import json
 
 from Model import *
 
-CONST_WIDTH = 800
-CONST_HEIGHT = 600
+
 CONST_BORDER = 20
 CONST_THUMBNAIL_COUNT = 5
 CONST_THUMBNAIL_SIZE = 100
@@ -23,6 +22,13 @@ class Window(QWidget):
         self.mode = 'thumbnails'
         self.stylesheet = ''
         self.selected_thumbnail_stylesheet = 'border: 5px solid red;'
+        
+        self.window_width = 800
+        self.window_height = 600
+
+        if len(sys.argv) > 1:
+        	self.window_width = int(sys.argv[1])
+        	self.window_height = self.window_width * (3/4)
 
         self.thumbnail_labels = []
         self.thumbnail_pixmaps = []
@@ -37,7 +43,7 @@ class Window(QWidget):
         self.fullscreen_pixmap = QPixmap(self.model.get_current_filename())
 
         self.setWindowTitle(self.title)
-        self.setGeometry(100, 100, CONST_WIDTH, CONST_HEIGHT)
+        self.setGeometry(100, 100, self.window_width, self.window_height)
         self.setStyleSheet('background: #00C0FF;')
 
         self.load_thumbnails()
@@ -53,11 +59,11 @@ class Window(QWidget):
     def init_labels(self):
         self.fullscreen_label = QLabel(self)
 
-        self.fullscreen_label.resize(CONST_WIDTH / 2, CONST_HEIGHT / 2)
+        self.fullscreen_label.resize(self.window_width / 2, self.window_height / 2)
         self.fullscreen_label.setStyleSheet(self.selected_thumbnail_stylesheet)
         self.fullscreen_label.setAlignment(Qt.AlignCenter)
         self.fullscreen_label.setFocusPolicy(Qt.StrongFocus)
-        self.fullscreen_label.move((CONST_WIDTH - (CONST_WIDTH / 2)) / 2, (CONST_HEIGHT - (CONST_HEIGHT/ 2)) /2)
+        self.fullscreen_label.move((self.window_width - (self.window_width / 2)) / 2, (self.window_height - (self.window_height/ 2)) /2)
 
 
         for index in range(0, CONST_NUM_TAGS):
@@ -86,7 +92,7 @@ class Window(QWidget):
 
         self.tag_field = QLineEdit(self)
         self.tag_field.setFocusPolicy(Qt.ClickFocus)
-        self.tag_field.move(300, 500)
+        self.tag_field.move(self.window_width - 300, self.window_height - 100)
 
         self.tag_field.hide()
 
@@ -177,7 +183,7 @@ class Window(QWidget):
 
     def show_fullscreen(self):
         self.fullscreen_pixmap = QPixmap(self.model.get_current_filename())       
-        self.fullscreen_pixmap = self.fullscreen_pixmap.scaled(CONST_WIDTH / 2, CONST_HEIGHT / 2, Qt.KeepAspectRatio)
+        self.fullscreen_pixmap = self.fullscreen_pixmap.scaled(self.window_width / 2, self.window_height / 2, Qt.KeepAspectRatio)
         
         self.fullscreen_label.setPixmap(self.fullscreen_pixmap)
         self.fullscreen_label.show()
@@ -267,7 +273,7 @@ class Window(QWidget):
             self.thumbnail_labels[index].resize(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE)
             self.thumbnail_labels[index].setAlignment(Qt.AlignCenter)
             # TODO: remove magic numbers below
-            self.thumbnail_labels[index].move(10 + index * 150 + (index * 20), (CONST_HEIGHT - CONST_THUMBNAIL_SIZE) / 2)
+            self.thumbnail_labels[index].move(10 + index * 150 + (index * 20), (self.window_height - CONST_THUMBNAIL_SIZE) / 2)
 
 
     def reload_thumbnails(self):
