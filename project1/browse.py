@@ -89,21 +89,22 @@ class Window(QWidget):
     def init_controls(self):
         self.add_tag_button = QPushButton('Add tag', self)
         self.add_tag_button.setFocusPolicy(Qt.ClickFocus)
-        self.add_tag_button.move(300, 550)
+        self.add_tag_button.move((self.window_width / 2) - 180, self.window_height - 50)
         self.add_tag_button.clicked.connect(self.add_tag)
 
         self.add_tag_button.hide()
 
         self.save_tags_button = QPushButton('Save all tags', self)
         self.save_tags_button.setFocusPolicy(Qt.ClickFocus)
-        self.save_tags_button.move(400, 550)
+        self.save_tags_button.move((self.window_width / 2) - 10, self.window_height - 50)
         self.save_tags_button.clicked.connect(self.save_tags)
 
         self.save_tags_button.hide()
 
         self.tag_field = QLineEdit(self)
         self.tag_field.setFocusPolicy(Qt.ClickFocus)
-        self.tag_field.move(self.window_width - 300, self.window_height - 100)
+        self.tag_field.move((self.window_width / 2) - 90, self.window_height - 100)
+        self.tag_field.setAlignment(Qt.AlignCenter)
 
         self.tag_field.hide()
 
@@ -245,9 +246,13 @@ class Window(QWidget):
         self.check_index_bounds()
         self.reload_thumbnails()
 
-        print("Current index: " + str(self.model.get_current_index()))
-        print("Leftmost index: " + str(self.model.get_leftmost_index()))
-        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
+        print("Current index - leftmost_index = " + str(self.model.get_current_index() - self.model.get_leftmost_index()))
+
+        if (self.model.get_current_index() == 15):
+            self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylesheet)
+            
+        else:
+            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
     def prev_image(self):       
@@ -258,7 +263,11 @@ class Window(QWidget):
         self.check_index_bounds()
         self.reload_thumbnails()
 
-        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
+        if (self.model.get_current_index() == 15):
+            print("enered")
+            self.thumbnail_labels[self.model.get_current_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
+        else:
+            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
     def select_thumbnail(self, thumbnail_index):
@@ -277,11 +286,12 @@ class Window(QWidget):
         if current_index > leftmost_index + 4:
 
         	# check if we've reached end of list
-            if current_index >= len(self.model.nodes) - 1:
+            if current_index >= len(self.model.nodes):
+                print("Index exceeds list bounds")
                 self.model.set_current_index(0)
 
             self.model.set_leftmost_index(self.model.get_current_index())
-        
+
         elif current_index < leftmost_index:
             self.model.set_leftmost_index(current_index - 4)
             self.model.set_current_index(self.model.get_leftmost_index() + 4)
@@ -310,6 +320,9 @@ class Window(QWidget):
         temp_index = self.model.get_leftmost_index()
 
         for label in self.thumbnail_labels:
+            if temp_index >= len(self.model.nodes):
+                temp_index = 0
+
             label.setPixmap(self.thumbnail_pixmaps[temp_index])
             temp_index += 1
 
