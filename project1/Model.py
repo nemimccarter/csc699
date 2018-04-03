@@ -78,12 +78,19 @@ class Model():
         return self.nodes[self.current_index]
 
 
-    def selet_next_node(self):
+    def select_next_node(self):
         self.current_index += 1
+
+        if self.get_current_index() >= len(self.image_files):
+            print("current index reset")
+            self.current_index = 0
 
 
     def select_prev_node(self):
-        self.current_index += 1
+        self.current_index -= 1
+
+        if self.get_current_index() < 0:
+            self.current_index = len(self.image_files) - 1
 
 
     def add_node(self, node):
@@ -102,11 +109,11 @@ class Model():
             self.current_index = 0
 
 
-    def prev_filename(self):
-        self.current_index -= 1
+    # def prev_filename(self):
+    #     self.current_index -= 1
 
-        if (self.current_index < 0):
-            self.current_index = len(self.image_files) - 1
+    #     if (self.current_index < 0):
+    #         self.current_index = len(self.image_files) - 1
 
 
     def get_current_filename(self):
@@ -160,9 +167,36 @@ class Model():
 
 
     def set_leftmost_index(self, new_index):
-        if new_index > len(self.image_files) - 6:
-            new_index = 0
-        elif new_index < 0:
-            new_index = len(self.image_files) - 6
+        # if new_index > len(self.image_files):
+        #     new_index = 4
+        # elif new_index < 0:
+        #     new_index = len(self.image_files) - 5
 
         self.leftmost_index = new_index
+
+
+    # def check_index_bounds(self, temp_index):
+    #     if temp_index - self.get_leftmost_index() > 4:
+    #         if (self.get_current_index() >= len(self.image_files)):
+    #             self.set_current_index(0)
+
+    #         self.set_leftmost_index(self.get_current_index())
+    #         temp_index = self.get_current_index()
+    #     if temp_index < self.get_leftmost_index() and self.get_leftmost_index() == len(self.image_files) - 1:
+
+
+    #     return temp_index
+    def check_index_bounds(self, temp_index):
+        if temp_index < self.get_leftmost_index():
+            if temp_index == 4:
+                temp_index = 3
+            elif temp_index == 0:
+                temp_index = self.get_current_index()
+
+        if temp_index >= len(self.image_files):
+            #self.set_current_index(0)
+            temp_index = 0
+        elif temp_index < 0:
+            temp_index = self.get_current_index()
+
+        return temp_index

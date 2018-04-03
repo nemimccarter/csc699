@@ -240,33 +240,26 @@ class Window(QWidget):
 
     def next_image(self):
         # remove red highlight from current selection
-        self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-        self.model.set_current_index(self.model.get_current_index() + 1)
-
-        self.check_index_bounds()
-        self.reload_thumbnails()
-
-        print("Current index - leftmost_index = " + str(self.model.get_current_index() - self.model.get_leftmost_index()))
-
-        if (self.model.get_current_index() == 15):
-            self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylesheet)
-            
+        if self.model.get_current_index() >= self.model.get_leftmost_index():
+            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
         else:
-            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
+        	self.thumbnail_labels[self.model.get_current_index() + 1].setStyleSheet('')
+
+        self.model.select_next_node()
+
+        self.reload_thumbnails()
 
 
     def prev_image(self):       
         # remove red highlight from current 
         self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-        self.model.set_current_index(self.model.get_current_index() - 1)
+        self.model.select_prev_node()
 
-        self.check_index_bounds()
-        self.reload_thumbnails()
+        #self.check_index_bounds()
+        if self.model.get_current_index() < self.model.get_leftmost_index():
+            self.reload_thumbnails()
 
-        if (self.model.get_current_index() == 15):
-            print("enered")
-            self.thumbnail_labels[self.model.get_current_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
-        else:
+        if (self.model.get_current_index() >= self.model.get_leftmost_index()):
             self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
@@ -279,23 +272,31 @@ class Window(QWidget):
         self.reload_thumbnails()
 
 
-    def check_index_bounds(self):
-        current_index = self.model.get_current_index()
-        leftmost_index = self.model.get_leftmost_index()
+    def reload_thumbnails(self):
+        print("current: " + str(self.model.get_current_index()))
+        print("leftmost: " + str(self.model.get_leftmost_index()))
+        print("current - leftmost: " + str(self.model.get_current_index() - self.model.get_leftmost_index()))
 
-        if current_index > leftmost_index + 4:
-
-        	# check if we've reached end of list
-            if current_index >= len(self.model.nodes):
-                print("Index exceeds list bounds")
-                self.model.set_current_index(0)
-
+        if (self.model.get_current_index() > self.model.get_leftmost_index() + 4):
             self.model.set_leftmost_index(self.model.get_current_index())
+        elif (self.model.get_leftmost_index() == 15 and self.model.get_current_index() == 4):
+            self.model.set_leftmost_index(self.model.get_current_index())
+        elif (self.model.get_current_index() == 15):
+        	self.model.set_leftmost_index(15)
+        temp_index = self.model.get_leftmost_index()
 
-        elif current_index < leftmost_index:
-            self.model.set_leftmost_index(current_index - 4)
-            self.model.set_current_index(self.model.get_leftmost_index() + 4)
+        for label in self.thumbnail_labels:
+            temp_index = self.model.check_index_bounds(temp_index)
 
+            label.setPixmap(self.thumbnail_pixmaps[temp_index])
+            
+            temp_index += 1
+
+        if (self.model.get_current_index() >= self.model.get_leftmost_index()):
+            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
+
+        else:
+        	self.thumbnail_labels[self.model.get_current_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
     def load_thumbnails(self):
         # load images into pixmap array
@@ -315,16 +316,6 @@ class Window(QWidget):
 
             self.thumbnail_labels[index].move((self.window_width / (self.window_width / 10)) + index * self.window_width / 5, (self.window_height - CONST_THUMBNAIL_SIZE) / 2)
 
-
-    def reload_thumbnails(self):
-        temp_index = self.model.get_leftmost_index()
-
-        for label in self.thumbnail_labels:
-            if temp_index >= len(self.model.nodes):
-                temp_index = 0
-
-            label.setPixmap(self.thumbnail_pixmaps[temp_index])
-            temp_index += 1
 
 
 if __name__ == '__main__':
