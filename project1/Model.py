@@ -4,6 +4,13 @@ from os.path import isfile, join
 import sys
 import click
 import json
+from flickrapi import FlickrAPI
+
+CONST_FLICKR_KEY = '68bb2464e8b9435179751681b0fe46de'
+CONST_FLICKR_SECRET = 'b04691a0177e2bbb'
+
+flickr = FlickrAPI(CONST_FLICKR_KEY, CONST_FLICKR_SECRET, format = 'parsed-json')
+extras='url_sq,url_t,url_s,url_q,url_m,url_n,url_z,url_c,url_l,url_o'
 
 
 class Image_Node():
