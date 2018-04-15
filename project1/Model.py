@@ -11,7 +11,7 @@ CONST_FLICKR_SECRET = 'b04691a0177e2bbb'
 
 flickr = FlickrAPI(CONST_FLICKR_KEY, CONST_FLICKR_SECRET, format = 'parsed-json')
 extras='url_sq,url_t,url_s,url_q,url_m,url_n,url_z,url_c,url_l,url_o'
-
+# Search format: cats = flickr.photos.search(text='kitten', per_page=5, extras=extras)
 
 class Image_Node():
     def __init__(self, image, index, tags):
@@ -83,6 +83,13 @@ class Model():
 
     def get_current_node(self):
         return self.nodes[self.current_index]
+
+
+    # searches flickr for num_results tags matching search_string
+    # appends results to model 
+    def search_flickr(self, search_string, num_results):
+        results = flickr.photos.search(text='kitten', per_page=5, extras=extras)
+        return results
 
 
     def select_next_node(self):

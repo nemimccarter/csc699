@@ -42,7 +42,6 @@ class Window(QWidget):
         		self.window_height = self.window_width * (3/4)
         	else:
         		print("Given width out of range. Defaulting to 600.")
-
         
         self.init_labels()
         self.init_controls()
@@ -63,7 +62,8 @@ class Window(QWidget):
         self.thumbnail_labels[0].setStyleSheet(self.selected_thumbnail_stylesheet)
 
         self.fullscreen_label.hide()
-        self.hide_tags()
+        for label in self.tag_labels:
+            label.hide()
         self.show()
 
 
@@ -94,6 +94,11 @@ class Window(QWidget):
 
         self.add_tag_button.hide()
 
+        self.search_button = QPushButton('Search', self)
+        self.search_button.setFocusPolicy(Qt.ClickFocus)
+        self.search_button.move(self.window_width / 3.7, self.window_height - (self.window_height / 10))
+        self.search_button.clicked.connect(self.search_flickr)
+
         self.save_tags_button = QPushButton('Save all tags', self)
         self.save_tags_button.setFocusPolicy(Qt.ClickFocus)
         self.save_tags_button.move((self.window_width / 2) - 10, self.window_height - 50)
@@ -103,10 +108,39 @@ class Window(QWidget):
 
         self.tag_field = QLineEdit(self)
         self.tag_field.setFocusPolicy(Qt.ClickFocus)
-        self.tag_field.move((self.window_width / 2) - 90, self.window_height - 100)
         self.tag_field.setAlignment(Qt.AlignCenter)
+        self.tag_field.move((self.window_width / 2) - 90, self.window_height - 100)
 
         self.tag_field.hide()
+
+        self.search_text_field = QLineEdit(self)
+        self.search_text_field.setFocusPolicy(Qt.ClickFocus)
+        self.search_text_field.move(self.window_width / 28, self.window_height - (self.window_height / 10))
+
+        self.search_number_field = QLineEdit(self)
+        self.search_number_field.setFocusPolicy(Qt.ClickFocus)
+        self.search_number_field.move(self.window_width / 2.5, self.window_height - (self.window_height / 10))
+        self.search_number_field.setFixedWidth(60)
+
+        self.test_button = QPushButton('Test', self)
+        self.test_button.setFocusPolicy(Qt.ClickFocus)
+        self.test_button.move(self.window_width / 28, self.window_height - (self.window_height / 19))
+        self.test_button.clicked.connect(self.test)
+
+        self.save_photos_button = QPushButton('Save', self)
+        self.save_photos_button.setFocusPolicy(Qt.ClickFocus)
+        self.save_photos_button.move(self.window_width / 7.3, self.window_height - (self.window_height / 19))
+        self.save_photos_button.clicked.connect(self.save_photos)
+
+        self.exit_button = QPushButton('Exit', self)
+        self.exit_button.setFocusPolicy(Qt.ClickFocus)
+        self.exit_button.move(self.window_width / 4.2, self.window_height - (self.window_height / 19))
+        self.exit_button.clicked.connect(self.close)
+
+        self.delete_button = QPushButton('Delete', self)
+        self.delete_button.setFocusPolicy(Qt.ClickFocus)
+        self.delete_button.move(self.window_width / 2.95, self.window_height - (self.window_height / 19))
+        self.delete_button.clicked.connect(self.delete)
 
 
     def init_sounds(self):
@@ -114,9 +148,9 @@ class Window(QWidget):
         self.train_sound.setSource(QUrl.fromLocalFile('./audio/TRAIN06.WAV'))
         self.train_sound.setVolume(0.5)
 
-        self.explosion_sound = QSoundEffect()
-        self.explosion_sound.setSource(QUrl.fromLocalFile('./audio/CONK.WAV'))
-        self.explosion_sound.setVolume(0.5)
+        self.conk_sound = QSoundEffect()
+        self.conk_sound.setSource(QUrl.fromLocalFile('./audio/CONK.WAV'))
+        self.conk_sound.setVolume(0.5)
     
 
     def add_tag(self):
@@ -124,9 +158,13 @@ class Window(QWidget):
         self.setFocusPolicy(Qt.ClickFocus)
         self.show_tags()
 
+    def delete(self):
+        pass
 
-    def save_tags(self):
-    	self.model.save_tags('tags.txt')
+
+    def hide_thumbnail_controls(self):
+        self.search_text_field.hide()
+        self.search_number_field.hide()
 
 
     def keyPressEvent(self, event):
@@ -139,7 +177,7 @@ class Window(QWidget):
 
             elif self.mode == 'fullscreen':
                 self.next_image()
-                self.show_fullscreen()
+                self.show_fullscreen_image()
                 self.show_tags()
         
         elif key_pressed == Qt.Key_Left:
@@ -149,7 +187,7 @@ class Window(QWidget):
           
             elif self.mode == 'fullscreen':
                 self.prev_image()
-                self.show_fullscreen()
+                self.show_fullscreen_image()
                 self.show_tags()
         
         elif key_pressed == Qt.Key_Up: 
@@ -157,34 +195,21 @@ class Window(QWidget):
             if self.mode == 'thumbnails':
                 self.mode = 'fullscreen'
 
-                self.show_fullscreen()
-                self.show_tags()
+                self.conk_sound.play()
 
-                self.explosion_sound.play()
+                self.show_fullscreen_image()
+                self.show_fullscreen_view()
 
-                self.add_tag_button.show()
-                self.save_tags_button.show()
-                self.tag_field.show()
-            
-                for label in self.thumbnail_labels:
-                    label.hide()
         
         elif key_pressed == Qt.Key_Down:
 
             if self.mode == 'fullscreen':
                 self.mode = 'thumbnails'
+
+                self.conk_sound.play()
+
                 self.fullscreen_label.hide()
-
-                self.explosion_sound.play()
-
-                self.add_tag_button.hide()
-                self.save_tags_button.hide()
-                self.tag_field.hide()
-
-                self.hide_tags()
-
-                for label in self.thumbnail_labels:
-                    label.show()
+                self.show_thumbnails_view()
         
         elif key_pressed == 46:
             if self.mode == 'thumbnails':
@@ -211,31 +236,24 @@ class Window(QWidget):
                 self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
-    def show_fullscreen(self):
-        self.fullscreen_pixmap = QPixmap(self.model.get_current_filename())       
-        self.fullscreen_pixmap = self.fullscreen_pixmap.scaled(self.window_width / 2, self.window_height / 2, Qt.KeepAspectRatio)
-        
-        self.fullscreen_label.setPixmap(self.fullscreen_pixmap)
-        self.fullscreen_label.show()
+    def load_thumbnails(self):
+        # load images into pixmap array
+        for _ in self.model.image_files:
+            self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
+            self.model.next_filename()
 
-        self.show_tags()
-        
+        for index in range(0, CONST_THUMBNAIL_COUNT):
+            # init thumbnail labels with corresponding pixmap
+            self.thumbnail_labels.append(QLabel(self))
+            self.thumbnail_labels[index].setPixmap(self.thumbnail_pixmaps[index])
 
-    def show_tags(self):
-        tags = self.model.get_tags()
+            # positioning labels
+            self.thumbnail_labels[index].resize(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE)
+            self.thumbnail_labels[index].setAlignment(Qt.AlignCenter)
+            # TODO: remove magic numbers below
 
-        for label in self.tag_labels:
-            label.setText('')
-
-        for label, tag in zip(self.tag_labels, tags):
-            label.hide()
-            label.setText(str(tag))
-            label.show()
-
-
-    def hide_tags(self):
-        for label in self.tag_labels:
-            label.hide()
+            self.thumbnail_labels[index].move(self.window_width / (self.window_width / 30) + (index * self.window_width / 5), (self.window_height - CONST_THUMBNAIL_SIZE) / 2)
+            #self.thumbnail_labels[index].move((self.window_width / (self.window_width / 10)) + index * self.window_width / 5, (self.window_height - CONST_THUMBNAIL_SIZE) / 2)
 
 
     def next_image(self):
@@ -254,6 +272,7 @@ class Window(QWidget):
         self.model.select_prev_node()
 
         self.reload_thumbnails()
+
 
     def reload_thumbnails(self):
         print("current: " + str(self.model.get_current_index()))
@@ -279,25 +298,90 @@ class Window(QWidget):
         self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
-    def load_thumbnails(self):
-        # load images into pixmap array
-        for _ in self.model.image_files:
-            self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
-            self.model.next_filename()
-
-        for index in range(0, CONST_THUMBNAIL_COUNT):
-            # init thumbnail labels with corresponding pixmap
-            self.thumbnail_labels.append(QLabel(self))
-            self.thumbnail_labels[index].setPixmap(self.thumbnail_pixmaps[index])
-
-            # positioning labels
-            self.thumbnail_labels[index].resize(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE)
-            self.thumbnail_labels[index].setAlignment(Qt.AlignCenter)
-            # TODO: remove magic numbers below
-
-            self.thumbnail_labels[index].move((self.window_width / (self.window_width / 10)) + index * self.window_width / 5, (self.window_height - CONST_THUMBNAIL_SIZE) / 2)
+    def save_photos(self):
+        pass
 
 
+    def save_tags(self):
+        self.model.save_tags('tags.txt')
+
+
+    def search_flickr(self):
+        results = self.model.search_flickr(self.search_text_field, self.search_text_field.text())
+        print(results)
+        
+        self.setFocusPolicy(Qt.ClickFocus)
+
+
+    def show_fullscreen_image(self):
+        self.fullscreen_pixmap = QPixmap(self.model.get_current_filename())       
+        self.fullscreen_pixmap = self.fullscreen_pixmap.scaled(self.window_width / 2, self.window_height / 2, Qt.KeepAspectRatio)
+        
+        self.fullscreen_label.setPixmap(self.fullscreen_pixmap)
+        self.fullscreen_label.show()
+
+        self.show_tags()
+
+
+    def show_fullscreen_view(self):
+        self.add_tag_button.show()
+        self.save_tags_button.show()
+        self.tag_field.show()
+        self.show_tags()
+            
+        for label in self.thumbnail_labels:
+            label.hide()
+
+        self.search_button.hide()
+        self.search_text_field.hide()
+        self.search_number_field.hide()
+        self.test_button.hide()
+        self.save_photos_button.hide()
+        self.exit_button.hide()
+        self.delete_button.hide()        
+
+
+    def show_tags(self):
+        tags = self.model.get_tags()
+
+        for label in self.tag_labels:
+            label.setText('')
+
+        for label, tag in zip(self.tag_labels, tags):
+            label.hide()
+            label.setText(str(tag))
+            label.show()
+
+
+    def show_thumbnail_controls(self):
+    	self.search_text_field.show()
+    	self.search_number_field.show()
+
+
+    def show_thumbnails_view(self):
+        for label in self.thumbnail_labels:
+            label.show()
+
+        self.add_tag_button.hide()
+        self.save_tags_button.hide()
+        self.tag_field.hide()
+        for label in self.tag_labels:
+            label.hide()
+
+        self.search_button.show()
+        self.search_text_field.show()
+        self.search_number_field.show()
+        self.search_button.show()
+        self.search_text_field.show()
+        self.search_number_field.show()
+        self.test_button.show()
+        self.save_photos_button.show()
+        self.exit_button.show()
+        self.delete_button.show()
+
+
+    def test(self):
+        pass
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
