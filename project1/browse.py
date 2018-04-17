@@ -45,7 +45,8 @@ class Window(QWidget):
         
         self.init_labels()
         self.init_controls()
-        self.init_UI()
+        if len(self.model.nodes) > 0:
+            self.init_UI()
         self.init_sounds()
 
 
@@ -153,13 +154,18 @@ class Window(QWidget):
         self.conk_sound.setVolume(0.5)
     
 
+    def delete(self):
+        self.model.delete()
+        self.reload_thumbnails()
+
+        self.delete_button.clearFocus()
+
+
     def add_tag(self):
         self.model.add_tag(self.tag_field.text())
-        self.setFocusPolicy(Qt.ClickFocus)
+        self.tag_field.setText('')
+        self.add_tag_button.clearFocus()
         self.show_tags()
-
-    def delete(self):
-        pass
 
 
     def hide_thumbnail_controls(self):
@@ -246,7 +252,8 @@ class Window(QWidget):
         for index in range(0, CONST_THUMBNAIL_COUNT):
             # init thumbnail labels with corresponding pixmap
             self.thumbnail_labels.append(QLabel(self))
-            self.thumbnail_labels[index].setPixmap(self.model.nodes[index].get_image().scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
+            if(index < len(self.model.nodes)):
+                self.thumbnail_labels[index].setPixmap(self.model.nodes[index].get_image().scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
 
             # positioning labels
             self.thumbnail_labels[index].resize(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE)
@@ -280,12 +287,8 @@ class Window(QWidget):
         print("leftmost: " + str(self.model.get_leftmost_index()))
         print("current - leftmost: " + str(self.model.get_current_index() % 5))
 
-        if (self.model.get_current_index() > self.model.get_leftmost_index() + 4):
+        if (self.model.get_current_index() % 5 == 0):
             self.model.set_leftmost_index(self.model.get_current_index())
-        # elif (self.model.get_current_index() < self.model.get_leftmost_index() and self.model.get_leftmost_index() != len(self.model.nodes) - 1):
-        #     self.model.set_leftmost_index(self.model.get_leftmost_index() - 5)
-        # elif (self.model.get_leftmost_index() == len(self.model.nodes) - 1 and self.model.get_current_index() == 4):
-        #     self.model.set_leftmost_index(self.model.get_current_index())
 
         temp_index = self.model.get_leftmost_index()
 
@@ -300,21 +303,24 @@ class Window(QWidget):
 
 
     def save_photos(self):
-        pass
+        self.model.save_nodes()
+
+        self.save_photos_button.clearFocus()
 
 
     def save_tags(self):
         self.model.save_tags('tags.txt')
+        self.save_tags_button.clearFocus()
 
 
     def search_flickr(self):
-        print('Searching for ' + self.search_text_field.text())
-        print('Will deliver ' + self.search_number_field.text() + ' results')
-
-        results = self.model.search_flickr(self.search_text_field.text(), self.search_number_field.text())
-        print(results)
+        search_string = ''.join('%20' if char == ' ' else char for char in self.search_text_field.text())
+        self.model.search_flickr(search_string, self.search_number_field.text())
         
-        self.setFocusPolicy(Qt.ClickFocus)
+        self.reload_thumbnails()
+
+        self.search_text_field.setText('')
+        self.search_button.clearFocus()
 
 
     def show_fullscreen_image(self):
@@ -385,7 +391,7 @@ class Window(QWidget):
 
 
     def test(self):
-        pass
+        self.test_button.clearFocus()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
