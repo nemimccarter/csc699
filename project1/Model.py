@@ -95,16 +95,16 @@ class Model():
         print(results)
 
         for result in results["photos"]["photo"]:
-            image_url = result["url_q"]
+            image_url = result["url_o"]
 
             image_data = urllib.request.urlopen(image_url).read()
-
             image = QtGui.QImage()
             image.loadFromData(image_data)
             
             node = Image_Node(image, len(self.nodes), '')
+            self.nodes.append(node)
 
-        self.nodes[0].set_image(node.get_image())
+
 
         return results
 

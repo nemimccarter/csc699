@@ -195,7 +195,7 @@ class Window(QWidget):
             if self.mode == 'thumbnails':
                 self.mode = 'fullscreen'
 
-                self.conk_sound.play()
+                #self.conk_sound.play()
 
                 self.show_fullscreen_image()
                 self.show_fullscreen_view()
@@ -206,7 +206,7 @@ class Window(QWidget):
             if self.mode == 'fullscreen':
                 self.mode = 'thumbnails'
 
-                self.conk_sound.play()
+                #self.conk_sound.play()
 
                 self.fullscreen_label.hide()
                 self.show_thumbnails_view()
@@ -309,7 +309,7 @@ class Window(QWidget):
 
     def search_flickr(self):
         print('Searching for ' + self.search_text_field.text())
-        print('Will deliver ' + self.search_number_field.text() + 'results')
+        print('Will deliver ' + self.search_number_field.text() + ' results')
 
         results = self.model.search_flickr(self.search_text_field.text(), self.search_number_field.text())
         print(results)
@@ -318,7 +318,7 @@ class Window(QWidget):
 
 
     def show_fullscreen_image(self):
-        self.fullscreen_pixmap = QPixmap(self.model.get_current_filename())       
+        self.fullscreen_pixmap = self.model.nodes[self.model.get_current_index()].get_image()       
         self.fullscreen_pixmap = self.fullscreen_pixmap.scaled(self.window_width / 2, self.window_height / 2, Qt.KeepAspectRatio)
         
         self.fullscreen_label.setPixmap(self.fullscreen_pixmap)
