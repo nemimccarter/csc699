@@ -1,10 +1,12 @@
 from PyQt5.QtGui import QPixmap
+from PyQt5 import QtGui
 from os import listdir, walk
 from os.path import isfile, join
 import sys
 import click
 import json
 from flickrapi import FlickrAPI
+import urllib.request
 
 CONST_FLICKR_KEY = '68bb2464e8b9435179751681b0fe46de'
 CONST_FLICKR_SECRET = 'b04691a0177e2bbb'
@@ -15,7 +17,7 @@ extras='url_sq,url_t,url_s,url_q,url_m,url_n,url_z,url_c,url_l,url_o'
 
 class Image_Node():
     def __init__(self, image, index, tags):
-        self.image = image
+        self.image = QPixmap(image)
         self.tags = []
 
         self.add_tag(tags)
@@ -69,7 +71,7 @@ class Model():
         # create self.nodes from self.image_files
         index = 0
         for image, tag_string in zip(self.image_files, saved_tags):
-            new_node = Image_Node(image, index, '')
+            new_node = Image_Node(self.dir_name + image, index, '')
             
             for tag in tag_string.split(', '):
                 new_node.add_tag(tag)
@@ -88,14 +90,28 @@ class Model():
     # searches flickr for num_results tags matching search_string
     # appends results to model 
     def search_flickr(self, search_string, num_results):
-        results = flickr.photos.search(text='kitten', per_page=5, extras=extras)
-        return results
+        results = flickr.photos.search(text=search_string, per_page=num_results, extras=extras)
+        print('Results:')
+        print(results)
 
+        for result in results["photos"]["photo"]:
+            image_url = result["url_q"]
+
+            image_data = urllib.request.urlopen(image_url).read()
+
+            image = QtGui.QImage()
+            image.loadFromData(image_data)
+            
+            node = Image_Node(image, len(self.nodes), '')
+
+        self.nodes[0].set_image(node.get_image())
+
+        return results
 
     def select_next_node(self):
         self.current_index += 1
 
-        if self.get_current_index() >= len(self.image_files):
+        if self.get_current_index() >= len(self.nodes):
             print("current index reset")
             self.current_index = 0
 
@@ -104,7 +120,7 @@ class Model():
         self.current_index -= 1
 
         if self.get_current_index() < 0:
-            self.current_index = len(self.image_files) - 1
+            self.current_index = len(self.nodes) - 1
 
 
     def add_node(self, node):
@@ -119,7 +135,7 @@ class Model():
     def next_filename(self):
         self.current_index += 1
 
-        if self.current_index >= len(self.image_files):
+        if self.current_index >= len(self.nodes):
             self.current_index = 0
 
 
@@ -207,7 +223,7 @@ class Model():
             elif temp_index == 0:
                 temp_index = self.get_current_index()
 
-        if temp_index >= len(self.image_files):
+        if temp_index >= len(self.nodes):
             #self.set_current_index(0)
             temp_index = 0
         elif temp_index < 0:

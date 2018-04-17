@@ -238,14 +238,15 @@ class Window(QWidget):
 
     def load_thumbnails(self):
         # load images into pixmap array
-        for _ in self.model.image_files:
-            self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
-            self.model.next_filename()
+        # for _ in self.model.image_files:
+        #     self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
+        #     self.model.next_filename()
 
+        # create labels
         for index in range(0, CONST_THUMBNAIL_COUNT):
             # init thumbnail labels with corresponding pixmap
             self.thumbnail_labels.append(QLabel(self))
-            self.thumbnail_labels[index].setPixmap(self.thumbnail_pixmaps[index])
+            self.thumbnail_labels[index].setPixmap(self.model.nodes[index].get_image().scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
 
             # positioning labels
             self.thumbnail_labels[index].resize(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE)
@@ -281,17 +282,17 @@ class Window(QWidget):
 
         if (self.model.get_current_index() > self.model.get_leftmost_index() + 4):
             self.model.set_leftmost_index(self.model.get_current_index())
-        elif (self.model.get_current_index() < self.model.get_leftmost_index() and self.model.get_leftmost_index() != len(self.model.nodes) - 1):
-            self.model.set_leftmost_index(self.model.get_leftmost_index() - 5)
-        elif (self.model.get_leftmost_index() == len(self.model.nodes) - 1 and self.model.get_current_index() == 4):
-            self.model.set_leftmost_index(self.model.get_current_index())
+        # elif (self.model.get_current_index() < self.model.get_leftmost_index() and self.model.get_leftmost_index() != len(self.model.nodes) - 1):
+        #     self.model.set_leftmost_index(self.model.get_leftmost_index() - 5)
+        # elif (self.model.get_leftmost_index() == len(self.model.nodes) - 1 and self.model.get_current_index() == 4):
+        #     self.model.set_leftmost_index(self.model.get_current_index())
 
         temp_index = self.model.get_leftmost_index()
 
         for label in self.thumbnail_labels:
             temp_index = self.model.check_index_bounds(temp_index)
 
-            label.setPixmap(self.thumbnail_pixmaps[temp_index])
+            label.setPixmap(self.model.nodes[temp_index].get_image().scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
             
             temp_index += 1
 
@@ -307,7 +308,10 @@ class Window(QWidget):
 
 
     def search_flickr(self):
-        results = self.model.search_flickr(self.search_text_field, self.search_text_field.text())
+        print('Searching for ' + self.search_text_field.text())
+        print('Will deliver ' + self.search_number_field.text() + 'results')
+
+        results = self.model.search_flickr(self.search_text_field.text(), self.search_number_field.text())
         print(results)
         
         self.setFocusPolicy(Qt.ClickFocus)
