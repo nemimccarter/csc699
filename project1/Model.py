@@ -92,36 +92,14 @@ class Model():
         self.nodes[self.get_current_index()].add_tag(tag)
 
 
-    # def check_index_bounds(self, temp_index):
-    #     if temp_index - self.get_leftmost_index() > 4:
-    #         if (self.get_current_index() >= len(self.image_files)):
-    #             self.set_current_index(0)
+    def check_index_bounds(self, temp_index, direction):
+        if direction == 'forward':
+            if temp_index >= len(self.nodes):
+                temp_index = 0
 
-    #         self.set_leftmost_index(self.get_current_index())
-    #         temp_index = self.get_current_index()
-    #     if temp_index < self.get_leftmost_index() and self.get_leftmost_index() == len(self.image_files) - 1:
-
-
-    #     return temp_index
-
-
-    def check_index_bounds(self, temp_index):
-        if temp_index >= len(self.nodes):
-            temp_index = 0
-        elif temp_index < 0:
-            temp_index = len(self.nodes) - 1
-        return temp_index
-        # if temp_index < self.get_leftmost_index():
-        #     if temp_index == 4:
-        #         temp_index = 3
-        #     elif temp_index == 0:
-        #         temp_index = self.get_current_index()
-
-        # if temp_index >= len(self.nodes):
-        #     self.set_current_index(0)
-        #     temp_index = 0
-        # elif temp_index < 0:
-        #     temp_index = self.get_current_index()
+        elif direction == 'backward':
+            if temp_index < 0 or temp_index >= len(self.nodes):
+                temp_index = len(self.nodes) - 1
 
         return temp_index
 
@@ -212,11 +190,6 @@ class Model():
 
 
     def set_leftmost_index(self, new_index):
-        # if new_index > len(self.image_files):
-        #     new_index = 4
-        # elif new_index < 0:
-        #     new_index = len(self.image_files) - 5
-
         self.leftmost_index = new_index
 
 
@@ -240,11 +213,11 @@ class Model():
         self.set_current_index(len(self.nodes) - int(num_results))
         self.set_leftmost_index(self.get_current_index())
 
+
     def select_next_node(self):
         self.current_index += 1
 
         if self.get_current_index() >= len(self.nodes):
-            print("current index reset")
             self.current_index = 0
 
 
@@ -253,10 +226,3 @@ class Model():
 
         if self.get_current_index() < 0:
             self.current_index = len(self.nodes) - 1
-
-
-    # def prev_filename(self):
-    #     self.current_index -= 1
-
-    #     if (self.current_index < 0):
-    #         self.current_index = len(self.image_files) - 1

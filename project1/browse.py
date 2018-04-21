@@ -156,7 +156,7 @@ class Window(QWidget):
 
     def delete(self):
         self.model.delete()
-        self.reload_thumbnails()
+        self.reload_thumbnails('forward')
 
         self.delete_button.clearFocus()
 
@@ -270,7 +270,7 @@ class Window(QWidget):
 
         self.model.select_next_node()
 
-        self.reload_thumbnails()
+        self.reload_thumbnails('forward')
 
 
     def prev_image(self):       
@@ -279,27 +279,44 @@ class Window(QWidget):
 
         self.model.select_prev_node()
 
-        self.reload_thumbnails()
+        self.reload_thumbnails('backward')
 
 
-    def reload_thumbnails(self):
-        print("current: " + str(self.model.get_current_index()))
-        print("leftmost: " + str(self.model.get_leftmost_index()))
-        print("current - leftmost: " + str(self.model.get_current_index() % 5))
-
+    def reload_thumbnails(self, direction):
         if (self.model.get_current_index() % 5 == 0):
             self.model.set_leftmost_index(self.model.get_current_index())
+        
+        elif (self.model.get_current_index() == self.model.get_leftmost_index() - 1):
+            self.model.set_leftmost_index(self.model.get_leftmost_index() - 5)
 
-        temp_index = self.model.get_leftmost_index()
+        if direction == 'forward':
+            temp_index = self.model.get_leftmost_index()
 
-        for label in self.thumbnail_labels:
-            temp_index = self.model.check_index_bounds(temp_index)
+            for label in self.thumbnail_labels:
+                temp_index = self.model.check_index_bounds(temp_index, direction)
 
-            label.setPixmap(self.model.nodes[temp_index].get_image().scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
+                label.setPixmap(self.model.nodes[temp_index].get_image().scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
             
-            temp_index += 1
+                temp_index += 1
 
-        self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet(self.selected_thumbnail_stylesheet)
+            self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet(self.selected_thumbnail_stylesheet)
+
+        
+        elif direction == 'backward':
+            temp_index = self.model.get_leftmost_index() + 4
+        
+            for label in reversed(self.thumbnail_labels):
+                temp_index = self.model.check_index_bounds(temp_index, direction)
+
+                label.setPixmap(self.model.nodes[temp_index].get_image().scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
+     
+                temp_index -= 1
+
+            if (self.model.get_current_index() == len(self.model.nodes) - 1):
+                self.thumbnail_labels[4].setStyleSheet(self.selected_thumbnail_stylesheet)
+            else:
+                self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet(self.selected_thumbnail_stylesheet)
+
 
 
     def save_photos(self):
@@ -317,7 +334,7 @@ class Window(QWidget):
         search_string = ''.join('%20' if char == ' ' else char for char in self.search_text_field.text())
         self.model.search_flickr(search_string, self.search_number_field.text())
         
-        self.reload_thumbnails()
+        self.reload_thumbnails('forward')
 
         self.search_text_field.setText('')
         self.search_button.clearFocus()
