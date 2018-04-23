@@ -26,8 +26,8 @@ class Window(QWidget):
         self.window_height = 600
 
         if len(sys.argv) > 1:
-        	self.window_width = int(sys.argv[1])
-        	self.window_height = self.window_width * (3/4)
+            self.window_width = int(sys.argv[1])
+            self.window_height = self.window_width * (3/4)
 
         self.thumbnail_labels = []
         self.thumbnail_pixmaps = []
@@ -37,11 +37,11 @@ class Window(QWidget):
         self.window_height = 600
 
         if len(sys.argv) > 1:
-        	if int(sys.argv[1]) >= 600 and int(sys.argv[1]) <= 1200:
-        		self.window_width = int(sys.argv[1])
-        		self.window_height = self.window_width * (3/4)
-        	else:
-        		print("Given width out of range. Defaulting to 600.")
+            if int(sys.argv[1]) >= 600 and int(sys.argv[1]) <= 1200:
+                self.window_width = int(sys.argv[1])
+                self.window_height = self.window_width * (3/4)
+            else:
+                print("Given width out of range. Defaulting to 600.")
         
         self.init_labels()
         self.init_controls()
@@ -152,13 +152,6 @@ class Window(QWidget):
         self.conk_sound = QSoundEffect()
         self.conk_sound.setSource(QUrl.fromLocalFile('./audio/CONK.WAV'))
         self.conk_sound.setVolume(0.5)
-    
-
-    def delete(self):
-        self.model.delete()
-        self.reload_thumbnails('forward')
-
-        self.delete_button.clearFocus()
 
 
     def add_tag(self):
@@ -166,6 +159,13 @@ class Window(QWidget):
         self.tag_field.setText('')
         self.add_tag_button.clearFocus()
         self.show_tags()
+    
+
+    def delete(self):
+        self.model.delete()
+        self.reload_thumbnails('forward')
+
+        self.delete_button.clearFocus()
 
 
     def hide_thumbnail_controls(self):
@@ -381,8 +381,8 @@ class Window(QWidget):
 
 
     def show_thumbnail_controls(self):
-    	self.search_text_field.show()
-    	self.search_number_field.show()
+        self.search_text_field.show()
+        self.search_number_field.show()
 
 
     def show_thumbnails_view(self):
@@ -408,7 +408,13 @@ class Window(QWidget):
 
 
     def test(self):
+        self.model.append_image_from_url(self.search_text_field.text())
+
+        self.reload_thumbnails('forward')
+
+        self.search_text_field.setText('')
         self.test_button.clearFocus()
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

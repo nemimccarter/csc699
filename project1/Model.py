@@ -92,6 +92,19 @@ class Model():
         self.nodes[self.get_current_index()].add_tag(tag)
 
 
+    def append_image_from_url(self, image_url):
+        image_data = urllib.request.urlopen(image_url).read()
+        
+        image = QtGui.QImage()
+        image.loadFromData(image_data)
+            
+        node = Image_Node(image, len(self.nodes), '')
+        self.nodes.append(node)
+
+        self.set_current_index(len(self.nodes) - 1)
+        self.set_leftmost_index(self.get_current_index())
+
+
     def check_index_bounds(self, temp_index, direction):
         if direction == 'forward':
             if temp_index >= len(self.nodes):
@@ -106,6 +119,8 @@ class Model():
 
     def delete(self):
         del self.nodes[self.get_current_index()]
+        self.save_nodes()
+        
         if self.get_current_index() == len(self.nodes) - 1:
             self.set_current_index(0)
 
@@ -128,11 +143,6 @@ class Model():
 
     def get_tags(self):
         return self.get_current_node().get_tags()
-        # tags_string = ''
-        # for tag in self.get_current_node().tags:
-        #     tags_string += str(tag)
-        #     tags_string += ' '
-        # return tags_string
 
 
     def load_tags(self, save_filename):
@@ -140,8 +150,7 @@ class Model():
         all_tags = save_filename.read()
 
         return all_tags
-        #for tag, node in zip(all_tags, self.nodes):
-        #    node.add_tag(tag)    def next_filename(self):
+
         self.current_index += 1
 
         if self.current_index >= len(self.nodes):
@@ -174,7 +183,6 @@ class Model():
 
         for node in self.nodes:
             node_tags = node.get_tags()
-            #node_tags.remove('')
             
             node_tags_string = ', '.join(str(tag) for tag in node_tags)
             tags_list += node_tags_string + '\n'
@@ -201,15 +209,11 @@ class Model():
 
         for result in results["photos"]["photo"]:
             image_url = result["url_c"]
+            
             print(image_url)
 
-            image_data = urllib.request.urlopen(image_url).read()
-            image = QtGui.QImage()
-            image.loadFromData(image_data)
-            
-            node = Image_Node(image, len(self.nodes), '')
-            self.nodes.append(node)
-
+            self.append_image_from_url(image_url)
+        
         self.set_current_index(len(self.nodes) - int(num_results))
         self.set_leftmost_index(self.get_current_index())
 
