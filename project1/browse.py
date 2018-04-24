@@ -5,8 +5,9 @@ from PyQt5.QtMultimedia import QSoundEffect
 
 from Model import *
 
+CONST_IMAGE_DIRECTORY = './data/'
 CONST_BORDER = 20
-CONST_THUMBNAIL_COUNT = 5
+CONST_MAX_THUMBNAIL_COUNT = 5
 CONST_THUMBNAIL_SIZE = 100
 CONST_NUM_TAGS = 10
 
@@ -16,7 +17,7 @@ class Window(QWidget):
         super().__init__()
         
         self.title = 'CSC 690 - Project 1'
-        self.model = Model('./data/')
+        self.model = Model(CONST_IMAGE_DIRECTORY)
         self.view_mode = 'thumbnails'
         self.mode = 'thumbnails'
         self.stylesheet = ''
@@ -222,7 +223,7 @@ class Window(QWidget):
 
                 self.train_sound.play()
 
-                for _ in range(0, CONST_THUMBNAIL_COUNT):
+                for _ in range(0, CONST_MAX_THUMBNAIL_COUNT):
                     self.next_image()
 
                 self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
@@ -234,7 +235,7 @@ class Window(QWidget):
 
                 self.train_sound.play()
 
-                for _ in range(0, CONST_THUMBNAIL_COUNT):
+                for _ in range(0, CONST_MAX_THUMBNAIL_COUNT):
                     self.prev_image()
 
                 self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
@@ -243,13 +244,9 @@ class Window(QWidget):
 
 
     def load_thumbnails(self):
-        # load images into pixmap array
-        # for _ in self.model.image_files:
-        #     self.thumbnail_pixmaps.append(QPixmap(self.model.get_current_filename()).scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
-        #     self.model.next_filename()
 
         # create labels
-        for index in range(0, CONST_THUMBNAIL_COUNT):
+        for index in range(0, CONST_MAX_THUMBNAIL_COUNT):
             # init thumbnail labels with corresponding pixmap
             self.thumbnail_labels.append(QLabel(self))
             if(index < len(self.model.nodes)):
@@ -266,7 +263,10 @@ class Window(QWidget):
 
     def next_image(self):
         # remove red highlight from current selection
-        self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
+        if self.model.get_current_index() >= self.model.get_leftmost_index():
+            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
+        else:
+            self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
 
         self.model.select_next_node()
 
@@ -274,8 +274,11 @@ class Window(QWidget):
 
 
     def prev_image(self):       
-        # remove red highlight from current 
-        self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
+        # remove red highlight from current
+        if self.model.get_current_index() >= self.model.get_leftmost_index(): 
+            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
+        else:
+            self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
 
         self.model.select_prev_node()
 
@@ -299,7 +302,7 @@ class Window(QWidget):
             
                 temp_index += 1
 
-            self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet(self.selected_thumbnail_stylesheet)
+            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
 
         
         elif direction == 'backward':
@@ -335,6 +338,8 @@ class Window(QWidget):
         self.model.search_flickr(search_string, self.search_number_field.text())
         
         self.reload_thumbnails('forward')
+
+        self.thumbnail_labels[1].setStyleSheet('')
 
         self.search_text_field.setText('')
         self.search_button.clearFocus()
@@ -408,6 +413,8 @@ class Window(QWidget):
 
 
     def test(self):
+        self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
+
         self.model.append_image_from_url(self.search_text_field.text())
 
         self.reload_thumbnails('forward')

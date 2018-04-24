@@ -120,7 +120,7 @@ class Model():
     def delete(self):
         del self.nodes[self.get_current_index()]
         self.save_nodes()
-        
+
         if self.get_current_index() == len(self.nodes) - 1:
             self.set_current_index(0)
 
@@ -161,16 +161,16 @@ class Model():
         index = 0
 
         # clear contents of image directory
-        filelist = [ f for f in os.listdir("./data") if f.endswith(".png") ]
+        filelist = [ f for f in os.listdir(self.dir_name) if f.endswith(".png") ]
         for f in filelist:
-            os.remove('./data/' + f)
+            os.remove(self.dir_name + f)
             print('removed ' + f)
         
         for node in self.nodes:
             if node.get_tags() != '':
                 if index <= 9:
                     index = '0' + str(index)
-                node.get_image().save('./data/image' + str(index) + '.png', format='PNG', quality=1)
+                node.get_image().save(self.dir_name + 'image' + str(index) + '.png', format='PNG', quality=1)
                 index = int(index)
             index += 1
 
@@ -208,8 +208,8 @@ class Model():
         print('Searching for ' + search_string)
 
         for result in results["photos"]["photo"]:
-            image_url = result["url_c"]
-            
+            image_url = result['url_z']
+
             print(image_url)
 
             self.append_image_from_url(image_url)
