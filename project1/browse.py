@@ -263,10 +263,9 @@ class Window(QWidget):
 
     def next_image(self):
         # remove red highlight from current selection
-        if self.model.get_current_index() >= self.model.get_leftmost_index():
+        self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
+        if self.model.get_current_index() - self.model.get_leftmost_index() < 5:
             self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-        else:
-            self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
 
         self.model.select_next_node()
 
@@ -275,10 +274,8 @@ class Window(QWidget):
 
     def prev_image(self):       
         # remove red highlight from current
-        if self.model.get_current_index() >= self.model.get_leftmost_index(): 
-            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
-        else:
-            self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
+        #self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet('')
+        self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet('')
 
         self.model.select_prev_node()
 
@@ -288,11 +285,12 @@ class Window(QWidget):
     def reload_thumbnails(self, direction):
         if (self.model.get_current_index() % 5 == 0):
             self.model.set_leftmost_index(self.model.get_current_index())
-        
         elif (self.model.get_current_index() == self.model.get_leftmost_index() - 1):
             self.model.set_leftmost_index(self.model.get_leftmost_index() - 5)
 
+
         if direction == 'forward':
+            print(self.model.get_leftmost_index())
             temp_index = self.model.get_leftmost_index()
 
             for label in self.thumbnail_labels:
@@ -301,11 +299,17 @@ class Window(QWidget):
                 label.setPixmap(self.model.nodes[temp_index].get_image().scaled(CONST_THUMBNAIL_SIZE, CONST_THUMBNAIL_SIZE, Qt.KeepAspectRatio))
             
                 temp_index += 1
-
-            self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
+            diff = self.model.get_current_index() - self.model.get_leftmost_index()
+            if diff >= 0 and diff < 5:
+                self.thumbnail_labels[diff].setStyleSheet(self.selected_thumbnail_stylesheet)
+            else:
+                self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet(self.selected_thumbnail_stylesheet)
 
         
         elif direction == 'backward':
+            if (self.model.get_current_index() == len(self.model.nodes) - 1):
+                self.model.set_leftmost_index(self.model.get_leftmost_index() - 5)            
+            
             temp_index = self.model.get_leftmost_index() + 4
         
             for label in reversed(self.thumbnail_labels):
@@ -318,7 +322,11 @@ class Window(QWidget):
             if (self.model.get_current_index() == len(self.model.nodes) - 1):
                 self.thumbnail_labels[4].setStyleSheet(self.selected_thumbnail_stylesheet)
             else:
-                self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet(self.selected_thumbnail_stylesheet)
+                diff = self.model.get_current_index() - self.model.get_leftmost_index()
+                if diff >= 0 and diff < 5:
+                    self.thumbnail_labels[self.model.get_current_index() - self.model.get_leftmost_index()].setStyleSheet(self.selected_thumbnail_stylesheet)
+                else:
+                    self.thumbnail_labels[self.model.get_current_index() % 5].setStyleSheet(self.selected_thumbnail_stylesheet)
 
 
 
