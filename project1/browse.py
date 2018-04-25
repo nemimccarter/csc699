@@ -290,7 +290,6 @@ class Window(QWidget):
 
 
         if direction == 'forward':
-            print(self.model.get_leftmost_index())
             temp_index = self.model.get_leftmost_index()
 
             for label in self.thumbnail_labels:
@@ -307,8 +306,8 @@ class Window(QWidget):
 
         
         elif direction == 'backward':
-            if (self.model.get_current_index() == len(self.model.nodes) - 1):
-                self.model.set_leftmost_index(self.model.get_leftmost_index() - 5)            
+            # if (self.model.get_current_index() == len(self.model.nodes) - 1):
+            #     self.model.set_leftmost_index(self.model.get_leftmost_index() - 4)            
             
             temp_index = self.model.get_leftmost_index() + 4
         

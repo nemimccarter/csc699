@@ -164,7 +164,6 @@ class Model():
         filelist = [ f for f in os.listdir(self.dir_name) if f.endswith(".png") ]
         for f in filelist:
             os.remove(self.dir_name + f)
-            print('removed ' + f)
         
         for node in self.nodes:
             if node.get_tags() != '':
@@ -174,6 +173,7 @@ class Model():
                 index = int(index)
             index += 1
 
+        print("Images saved")
         self.save_tags('tags.txt')
 
 
